@@ -20,29 +20,24 @@ class TwitterToRss:
 		url = "https://twitter.com/{}".format(self.nick)
 
 		content = urllib2.urlopen(url)
-		if urllib2.urlopen(url).getcode() == 200:
+		print 'Connection successful!'
+		soup = BeautifulSoup(content)
 
-			print 'Connection successful!'
-			soup = BeautifulSoup(content)
+		self.title = soup.title.string
+		self.tweets = []
 
-			self.title = soup.title.string
-			self.tweets = []
+		for content in soup.findAll("div", "content"):
 
-			for content in soup.findAll("div", "content"):
+			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
 
-				for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+				self.tweets.append([info, tweet])
 
-					self.tweets.append([info, tweet])
-
-		else:
-			print 'Error, site returned:', urllib2.urlopen(url).getcode()
 
 	def printTweets(self):
 		for tweet in self.tweets:
 			print tweet
 
 	def cleanTwit(self):
-
 		to_delete = self.TWIT_DELETE
 
 		to_replace = [{'<s>@</s>': '@'},
@@ -59,7 +54,6 @@ class TwitterToRss:
 		return self.tweets
 
 	def cleanInfo(self):
-
 		for i, tweet in enumerate(self.tweets):
 
 			soup = BeautifulSoup(str(self.tweets[i][0]))
@@ -77,7 +71,6 @@ class TwitterToRss:
 				self.tweets[i][0] = [link, date, plop]
 
 	def cleanTweet(self):
-
 		to_delete = self.TWEET_DELETE
 		for i, clean_twit in enumerate(self.tweets):
 			for item in to_delete:
@@ -86,7 +79,6 @@ class TwitterToRss:
 					item, '', str(self.tweets[i][0][2]))
 
 	def cleanTimestamp(self):
-
 		for i, tweet in enumerate(self.tweets):
 			timestamp = arrow.Arrow.fromtimestamp(float(self.tweets[i][0][1]))
 			date = timestamp.strftime('%a, %d %b %Y %H:%M:%S %z')
@@ -117,7 +109,7 @@ class TwitterToRss:
 						update = False
 						data = original.read()
 		except IOError:
-			print 'Error: The file could not be read'
+			print 'Error: The file ' + self.nick + '-backup.xml could not be read'
 			pass
 
 		if update:
@@ -129,10 +121,9 @@ class TwitterToRss:
 				modified.write(str(data))
 				print 'Update done'
 		else:
-			print 'Already updated, nothing to do'
+			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
-
 		filename = re.sub(r'.*\((.*?)\).*', r'\1', self.title)
 		with open(filename + '.xml', 'w') as html:
 
@@ -208,9 +199,23 @@ class TwitterToRss:
 	</channel>
 </rss>'''
 
-tweet = TwitterToRss('C4ptainCrunch_')
+accounts_to_rss = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
+for account in accounts_to_rss:
 
-tweet.generateHtml()
-tweet.generateRss()
-tweet.backupTweet()
+	try:
+		tweet = TwitterToRss(account)
+		print 'Account {account} found'.format(account = account)
+		error = 200
+	except urllib2.HTTPError, e:
+		if e.code == 404:
+			print 'Account {account} not found'.format(account = account)
+			error = e.code
+			print 'Error: Twitter returned {error} for {account}'.format(error = error, account = account)
+			
+	if error == 200:
+		tweet.generateHtml()
+		tweet.generateRss()
+		tweet.backupTweet()
+
+
 # tweet.printTweets()
