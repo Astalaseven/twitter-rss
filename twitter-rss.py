@@ -6,6 +6,10 @@ import urllib2
 import re
 import arrow
 
+### CONSTANTES ###
+TIMER = 600
+SERVER = 'localhost'
+ACCOUNTS = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
 
 class TwitterToRss:
 
@@ -13,7 +17,7 @@ class TwitterToRss:
 		self.tweets = []
 		self.title = ''
 		self.nick = nick
-		self.server = 'localhost'
+		self.server = SERVER
 		self.initBeautifulSoup()
 		self.clean()
 
@@ -85,8 +89,7 @@ class TwitterToRss:
 			self.tweets[i][0][1] = date
 
 	def generateHtml(self):
-		filename = re.sub(r'.*\((.*?)\).*', r'\1', self.title)
-		with open(filename + '.html', 'w') as html:
+		with open(self.nick + '.html', 'w') as html:
 			html.write(
 				'<meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>\n\n')
 			for tweet in self.tweets:
@@ -124,8 +127,7 @@ class TwitterToRss:
 			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
-		filename = re.sub(r'.*\((.*?)\).*', r'\1', self.title)
-		with open(filename + '.xml', 'w') as html:
+		with open(self.nick + '.xml', 'w') as html:
 
 			html.write(self.XML_TOP.format(
 				nick=self.nick, title=self.title, server=self.server))
@@ -142,6 +144,14 @@ class TwitterToRss:
 					title=title, link=link, date=date, twit=twit, author=author))
 			html.write(self.XML_END)
 		html.close()
+
+	def isRssValid(self):
+		with open(self.nick + '.xml', 'w') as html:
+
+			url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
+			print url
+			content = urllib2.urlopen(url)
+
 
 	def clean(self):
 		self.cleanTwit()
@@ -200,8 +210,7 @@ class TwitterToRss:
 
 if __name__ == '__main__':
 
-	accounts_to_rss = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
-	for account in accounts_to_rss:
+	for account in ACCOUNTS:
 
 		try:
 			tweet = TwitterToRss(account)
@@ -212,6 +221,11 @@ if __name__ == '__main__':
 				print 'Account {account} not found'.format(account=account)
 				error = e.code
 				print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+			elif e.code == 101:
+				print 'Error: Network is unreachable'
+		except urllib2.URLError as e:
+			print 'Invalid URL'
+			error = -2
 
 		if error == 200:
 			tweet.generateHtml()
