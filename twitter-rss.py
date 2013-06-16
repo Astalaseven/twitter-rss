@@ -5,9 +5,10 @@ from BeautifulSoup import BeautifulSoup
 import urllib2
 import re
 import arrow
+import time
 
 ### CONSTANTES ###
-TIMER = 600
+TIMER = 60
 SERVER = 'localhost'
 ACCOUNTS = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
 
@@ -210,27 +211,33 @@ class TwitterToRss:
 
 if __name__ == '__main__':
 
-	for account in ACCOUNTS:
+	while 1:
 
-		try:
-			tweet = TwitterToRss(account)
-			print 'Account {account} found'.format(account=account)
-			error = 200
-		except urllib2.HTTPError as e:
-			if e.code == 404:
-				print 'Account {account} not found'.format(account=account)
-				error = e.code
-				print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
-			elif e.code == 101:
-				print 'Error: Network is unreachable'
-		except urllib2.URLError as e:
-			print 'Invalid URL'
-			error = -2
+		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
+		
+		for account in ACCOUNTS:
 
-		if error == 200:
-			tweet.generateHtml()
-			tweet.generateRss()
-			tweet.backupTweet()
+			try:
+				tweet = TwitterToRss(account)
+				print 'Account {account} found'.format(account=account)
+				error = 200
+			except urllib2.HTTPError as e:
+				if e.code == 404:
+					print 'Account {account} not found'.format(account=account)
+					error = e.code
+					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+				elif e.code == 101:
+					print 'Error: Network is unreachable'
+			except urllib2.URLError as e:
+				print 'Invalid URL'
+				error = -2
+
+			if error == 200:
+				tweet.generateHtml()
+				tweet.generateRss()
+				tweet.backupTweet()
+
+		time.sleep(TIMER)
 
 
 # tweet.printTweets()
