@@ -74,6 +74,7 @@ class TwitterToRss:
                 self.tweets[i][0] = [link, date, plop]
 
     def cleanTweet(self):
+
         to_delete = self.TWEET_DELETE
         for i, clean_twit in enumerate(self.tweets):
             for item in to_delete:
@@ -170,7 +171,8 @@ class TwitterToRss:
         '<span><span>&nbsp;</span>.*</span>',
         '<span>http://</span>',
         '<span></span>',
-        ' data-pre-embedded="true"']
+        ' data-pre-embedded="true"',
+        '<p>', '</p>']
 
     TWEET_DELETE = ['<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
         '<span>', '</span>', '</a>', '<b>', '</b>']
