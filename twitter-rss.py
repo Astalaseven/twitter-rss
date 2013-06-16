@@ -24,7 +24,6 @@ class TwitterToRss:
 
             print 'Connection successful!'
             soup = BeautifulSoup(content)
-            print soup
 
             self.title = soup.title.string
             self.tweets = []
@@ -139,8 +138,9 @@ class TwitterToRss:
                 link = str(self.tweets[i][0][0])
                 twit = str(self.tweets[i][1])
                 title = str(self.tweets[i][0][2])
+                author = str(self.tweets[i][0][0]).split('/')[1]
 
-                html.write(self.XML_FOR.format(title=title, link=link, date=date, twit=twit))
+                html.write(self.XML_FOR.format(title=title, link=link, date=date, twit=twit, author=author))
             html.write(self.XML_END)
         html.close()
 
@@ -189,11 +189,11 @@ class TwitterToRss:
 
     XML_FOR = '''
                 <item>
-                <title>{title}</title>
+                <title>{author}: {title}</title>
                 <guid>https://twitter.com{link}</guid>
                 <link>https://twitter.com{link}</link>
                 <pubDate>{date}</pubDate>
-                <description><![CDATA[{twit}]]></description>
+                <description><![CDATA[{author}: {twit}]]></description>
                 </item>
                 '''
     XML_END = '''
