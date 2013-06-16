@@ -10,7 +10,7 @@ import time
 ### CONSTANTES ###
 TIMER = 60
 SERVER = 'localhost'
-ACCOUNTS = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
+ACCOUNTS = ['framasoft', 'aprilorg']
 
 class TwitterToRss:
 
