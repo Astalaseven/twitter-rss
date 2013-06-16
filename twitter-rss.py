@@ -6,6 +6,7 @@ import urllib2
 import re
 import arrow
 
+
 class TwitterToRss:
 
 	def __init__(self, nick):
@@ -31,7 +32,6 @@ class TwitterToRss:
 			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
 
 				self.tweets.append([info, tweet])
-
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -143,7 +143,6 @@ class TwitterToRss:
 			html.write(self.XML_END)
 		html.close()
 
-
 	def clean(self):
 		self.cleanTwit()
 		self.cleanInfo()
@@ -171,9 +170,9 @@ class TwitterToRss:
 		' data-pre-embedded="true"',
 		'<p>', '</p>', '<span>', '</span>']
 
-	TWEET_DELETE = ['<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
+	TWEET_DELETE = [
+		'<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
 		'<span>', '</span>', '</a>', '<b>', '</b>']
-
 
 	XML_TOP = '''<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -199,23 +198,25 @@ class TwitterToRss:
 	</channel>
 </rss>'''
 
-accounts_to_rss = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
-for account in accounts_to_rss:
+if __name__ == '__main__':
 
-	try:
-		tweet = TwitterToRss(account)
-		print 'Account {account} found'.format(account = account)
-		error = 200
-	except urllib2.HTTPError, e:
-		if e.code == 404:
-			print 'Account {account} not found'.format(account = account)
-			error = e.code
-			print 'Error: Twitter returned {error} for {account}'.format(error = error, account = account)
-			
-	if error == 200:
-		tweet.generateHtml()
-		tweet.generateRss()
-		tweet.backupTweet()
+	accounts_to_rss = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
+	for account in accounts_to_rss:
+
+		try:
+			tweet = TwitterToRss(account)
+			print 'Account {account} found'.format(account=account)
+			error = 200
+		except urllib2.HTTPError as e:
+			if e.code == 404:
+				print 'Account {account} not found'.format(account=account)
+				error = e.code
+				print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+
+		if error == 200:
+			tweet.generateHtml()
+			tweet.generateRss()
+			tweet.backupTweet()
 
 
 # tweet.printTweets()
