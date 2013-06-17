@@ -10,6 +10,7 @@ import time
 ### CONSTANTES ###
 TIMER = 600
 SERVER = 'localhost'
+DIR = '/var/www/twitter-rss/' # must exist and must have right to read/write
 ACCOUNTS = ['framasoft', 'UrLabBxl']
 HASHTAG = ['framasoft', 'urlab']
 PICS = False
@@ -107,7 +108,7 @@ class TwitterToRss:
 			self.tweets[i][0][1] = date
 
 	def generateHtml(self):
-		with open(self.nick + '.html', 'w') as html:
+		with open(DIR + self.nick + '.html', 'w') as html:
 			html.write(
 				'<meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>\n\n')
 			for tweet in self.tweets:
@@ -120,7 +121,7 @@ class TwitterToRss:
 		update = True
 		data = ''
 		try:
-			with open(self.nick + '-backup.xml', 'r') as original:
+			with open(DIR + self.nick + '-backup.xml', 'r') as original:
 				first_tweet = []
 				first_tweet.append(original.readline())
 				if first_tweet[0]:
@@ -136,7 +137,7 @@ class TwitterToRss:
 			pass
 
 		if update:
-			with open(self.nick + '-backup.xml', 'w') as modified:
+			with open(DIR + self.nick + '-backup.xml', 'w') as modified:
 				print 'Update in progress'
 
 				for tweet in self.tweets:
@@ -151,7 +152,7 @@ class TwitterToRss:
 		if not account:
 			self.nick = self.nick + '-search'
 
-		with open(self.nick + '.xml', 'w') as html:
+		with open(DIR + self.nick + '.xml', 'w') as html:
 
 			html.write(self.XML_TOP.format(
 				nick=self.nick, title=self.title, server=self.server))
