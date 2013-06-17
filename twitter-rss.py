@@ -252,9 +252,8 @@ class TwitterToRss:
 
 if __name__ == '__main__':
 
-	i = 1
 
-	while i == 1:
+	while 1:
 
 		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
 		
@@ -282,10 +281,7 @@ if __name__ == '__main__':
 				tweet.generateRss()
 				tweet.backupTweet()
 				
-
-		i = 2
-
-		#time.sleep(TIMER)
+		time.sleep(TIMER)
 
 
 # tweet.printTweets()
