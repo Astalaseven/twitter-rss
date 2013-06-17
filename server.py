@@ -30,7 +30,7 @@ def twitter_to_xml(username):
 	except IOError:
 		return 'Accounts.txt could not be written'
 
-		twitter_rss.TwitterToRss(username)
+	twitter_rss.TwitterToRss(username)
 
 		# print 'Waiting 10 seconds before feed is generated...'
 
@@ -39,9 +39,11 @@ def twitter_to_xml(username):
 			content = content_file.read()
 		content_file.close()
 
-		return content 
 	except IOError:
 		return 'File ' + username + '.xml could not be read'
+
+	return content 
+
 
 if __name__ == "__main__":
 	app.run(debug=True)
