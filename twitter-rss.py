@@ -10,21 +10,33 @@ import time
 ### CONSTANTES ###
 TIMER = 600
 SERVER = 'localhost'
-ACCOUNTS = ['framasoft']
+ACCOUNTS = ['framasoft', 'UrLabBxl']
+HASHTAG = ['framasoft', 'urlab']
 PICS = False
 
 class TwitterToRss:
 
 	def __init__(self, nick):
 		self.tweets = []
+		self.hashtag = []
 		self.title = ''
 		self.nick = nick
 		self.server = SERVER
-		self.initBeautifulSoup()
-		self.clean()
 
-	def initBeautifulSoup(self):
-		url = "https://twitter.com/{}".format(self.nick)
+		self.initPseudo()
+	
+		self.clean()
+		
+
+	def initPseudo(self):
+
+		if account:
+
+			url = "https://twitter.com/{}".format(self.nick)
+
+		elif hashtag:
+
+			url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
 
 		content = urllib2.urlopen(url)
 		print 'Connection successful!'
@@ -43,6 +55,7 @@ class TwitterToRss:
 				else:
 					self.tweets.append([info, tweet])
 
+
 	def printTweets(self):
 		for tweet in self.tweets:
 			print tweet
@@ -60,8 +73,6 @@ class TwitterToRss:
 				for old, new in item.items():
 					self.tweets[i][1] = re.sub(
 						old, new, str(self.tweets[i][1]))
-
-		return self.tweets
 
 	def cleanInfo(self):
 		for i, tweet in enumerate(self.tweets):
@@ -87,6 +98,7 @@ class TwitterToRss:
 
 				self.tweets[i][0][2] = re.sub(
 					item, '', str(self.tweets[i][0][2]))
+	
 
 	def cleanTimestamp(self):
 		for i, tweet in enumerate(self.tweets):
@@ -111,12 +123,14 @@ class TwitterToRss:
 			with open(self.nick + '-backup.xml', 'r') as original:
 				first_tweet = []
 				first_tweet.append(original.readline())
-				first_tweet = first_tweet[0].split('\'')[1]
+				if first_tweet[0]:
+					first_tweet = first_tweet[0].split('\'')[1]
 
-				for i, tweet in enumerate(self.tweets):
-					if first_tweet in self.tweets[i][0][0]:
-						update = False
-						data = original.read()
+					for i, tweet in enumerate(self.tweets):
+						if first_tweet in self.tweets[i][0][0]:
+							update = False
+							data = original.read()
+
 		except IOError:
 			print 'Error: The file ' + self.nick + '-backup.xml could not be read'
 			pass
@@ -133,6 +147,10 @@ class TwitterToRss:
 			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
+
+		if not account:
+			self.nick = self.nick + '-search'
+
 		with open(self.nick + '.xml', 'w') as html:
 
 			html.write(self.XML_TOP.format(
@@ -154,7 +172,6 @@ class TwitterToRss:
 
 					img = self.tweets[i][2][0]
 					alt = self.tweets[i][2][1]
-					print img, alt
 
 					html.write(self.XML_IMG.format(
 						img = img, title = title))
@@ -165,11 +182,13 @@ class TwitterToRss:
 		html.close()
 
 	def isRssValid(self):
-		with open(self.nick + '.xml', 'w') as html:
 
-			url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
-			print url
-			content = urllib2.urlopen(url)
+		url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
+		print url
+		content = urllib2.urlopen(url)
+		soup = BeautifulSoup(content)
+		response = soup.findAll("span", { "class" : "message" })[0].text
+		print response
 
 	def activatePics(self):
 		for i, item in enumerate(self.tweets):
@@ -211,7 +230,7 @@ class TwitterToRss:
 		'<span><span>&nbsp;</span>.*</span>',
 		'<span>http://</span>',
 		' data-pre-embedded="true"',
-		'<p>', '</p>', '<span>', '</span>']
+		'<p>', '</p>', '<span>', '</span>', '<strong>', '</strong>']
 
 	TWEET_DELETE = [
 		'<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
@@ -234,11 +253,10 @@ class TwitterToRss:
 				<guid>https://twitter.com{link}</guid>
 				<link>https://twitter.com{link}</link>
 				<pubDate>{date}</pubDate>
-				<description><![CDATA[{author}: {twit}
+				<description><![CDATA[{author}: {twit}'''
 
-				'''
-
-	XML_IMG = '''<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
+	XML_IMG = '''
+				<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
 				'''
 				
 	XML_ITEM = ''']]></description>
@@ -253,39 +271,78 @@ class TwitterToRss:
 if __name__ == '__main__':
 
 	i = 1
-
 	while i == 1:
 
 		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
 		
-		for account in ACCOUNTS:
+		if ACCOUNTS:
 
-			try:
-				tweet = TwitterToRss(account)
-				print 'Account {account} found'.format(account=account)
-				error = 200
-			except urllib2.HTTPError as e:
-				if e.code == 404:
-					print 'Account {account} not found'.format(account=account)
-					error = e.code
-					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
-				elif e.code == 101:
-					print 'Error: Network is unreachable'
-			except urllib2.URLError as e:
-				print 'Invalid URL'
-				error = -2
+			for account in ACCOUNTS:
 
-			if error == 200:
-				if PICS == True:
-					tweet.activatePics()
-				tweet.generateHtml()
-				tweet.generateRss()
-				tweet.backupTweet()
-				
+				hashtag = False
+
+				try:
+					tweet = TwitterToRss(account)
+					print 'Account {account} found'.format(account=account)
+					error = 200
+				except urllib2.HTTPError as e:
+					if e.code == 404:
+						print 'Account {account} not found'.format(account=account)
+						error = e.code
+						print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+					elif e.code == 101:
+						print 'Error: Network is unreachable'
+				except urllib2.URLError as e:
+					print 'Invalid URL'
+					error = -2
+
+				if error == 200:
+					if PICS == True:
+						tweet.activatePics()
+					tweet.generateHtml()
+					
+					tweet.generateRss()
+
+					tweet.backupTweet()
+					# tweet.isRssValid()
+		else:
+			print('Not account specified')
+
+		if HASHTAG:
+
+			for hashtag in HASHTAG:
+
+				account = False
+
+				try:
+					tweet = TwitterToRss(hashtag)
+					print 'Hashtag {hashtag} found'.format(hashtag=hashtag)
+					error = 200
+				except urllib2.HTTPError as e:
+					if e.code == 404:
+						print 'Hashtag {hashtag} not found'.format(hashtag=hashtag)
+						error = e.code
+						print 'Error: Twitter returned {error} for {hashtag}'.format(error=error, hashtag=hashtag)
+					elif e.code == 101:
+						print 'Error: Network is unreachable'
+				except urllib2.URLError as e:
+					print 'Invalid URL'
+					error = -2
+
+				if error == 200:
+					if PICS == True:
+						tweet.activatePics()
+					tweet.generateHtml()
+					
+					tweet.generateRss()
+
+					tweet.backupTweet()
+					# tweet.isRssValid()
+		else:
+			print('Not hashtag specified')
+
 
 		i = 2
-
 		#time.sleep(TIMER)
-
 
 # tweet.printTweets()
