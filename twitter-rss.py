@@ -154,7 +154,6 @@ class TwitterToRss:
 
 					img = self.tweets[i][2][0]
 					alt = self.tweets[i][2][1]
-					print img, alt
 
 					html.write(self.XML_IMG.format(
 						img = img, title = title))
@@ -170,6 +169,10 @@ class TwitterToRss:
 			url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
 			print url
 			content = urllib2.urlopen(url)
+			soup = BeautifulSoup(content)
+			# print soup
+			response = soup.findAll("span", { "class" : "message" })[0].text
+			print response
 
 	def activatePics(self):
 		for i, item in enumerate(self.tweets):
@@ -234,11 +237,10 @@ class TwitterToRss:
 				<guid>https://twitter.com{link}</guid>
 				<link>https://twitter.com{link}</link>
 				<pubDate>{date}</pubDate>
-				<description><![CDATA[{author}: {twit}
+				<description><![CDATA[{author}: {twit}'''
 
-				'''
-
-	XML_IMG = '''<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
+	XML_IMG = '''
+				<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
 				'''
 				
 	XML_ITEM = ''']]></description>
@@ -280,6 +282,7 @@ if __name__ == '__main__':
 				tweet.generateHtml()
 				tweet.generateRss()
 				tweet.backupTweet()
+				tweet.isRssValid()
 				
 		time.sleep(TIMER)
 
