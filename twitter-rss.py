@@ -10,8 +10,8 @@ import time
 ### CONSTANTES ###
 TIMER = 600
 SERVER = 'localhost'
-ACCOUNTS = ['framasoft']
-HASHTAG = ['rss', 'framasoft']
+ACCOUNTS = ['framasoft', 'UrLabBxl']
+HASHTAG = ['framasoft', 'urlab']
 PICS = False
 
 class TwitterToRss:
@@ -56,12 +56,10 @@ class TwitterToRss:
 
 		if hashtag:
 			url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
-			print url
 
 			content = urllib2.urlopen(url)
 			print 'Connection successful!'
 			soup = BeautifulSoup(content)
-			# print soup
 
 			self.title = soup.title.string
 			self.tweets = []
@@ -75,7 +73,6 @@ class TwitterToRss:
 						self.tweets.append([info, tweet, pics])
 					else:
 						self.tweets.append([info, tweet])
-			# print self.hashtag[0]
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -94,8 +91,6 @@ class TwitterToRss:
 				for old, new in item.items():
 					self.tweets[i][1] = re.sub(
 						old, new, str(self.tweets[i][1]))
-
-		# return self.tweets
 
 	def cleanInfo(self):
 		for i, tweet in enumerate(self.tweets):
@@ -146,12 +141,14 @@ class TwitterToRss:
 			with open(self.nick + '-backup.xml', 'r') as original:
 				first_tweet = []
 				first_tweet.append(original.readline())
-				first_tweet = first_tweet[0].split('\'')[1]
+				if first_tweet[0]:
+					first_tweet = first_tweet[0].split('\'')[1]
 
-				for i, tweet in enumerate(self.tweets):
-					if first_tweet in self.tweets[i][0][0]:
-						update = False
-						data = original.read()
+					for i, tweet in enumerate(self.tweets):
+						if first_tweet in self.tweets[i][0][0]:
+							update = False
+							data = original.read()
+
 		except IOError:
 			print 'Error: The file ' + self.nick + '-backup.xml could not be read'
 			pass
@@ -322,10 +319,7 @@ if __name__ == '__main__':
 				
 				tweet.generateRss()
 
-				# tweet.initHashtag()
-
-				# tweet.generateRss()
-				# tweet.backupTweet()
+				tweet.backupTweet()
 				# tweet.isRssValid()
 
 		for hashtag in HASHTAG:
@@ -354,9 +348,11 @@ if __name__ == '__main__':
 				
 				tweet.generateRss()
 
+				# tweet.backupTweet()
+				# tweet.isRssValid()
+
 
 		i = 2
 		#time.sleep(TIMER)
-
 
 # tweet.printTweets()
