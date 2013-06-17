@@ -11,19 +11,22 @@ import time
 TIMER = 600
 SERVER = 'localhost'
 ACCOUNTS = ['framasoft']
+HASHTAG = ['rss']
 PICS = False
 
 class TwitterToRss:
 
 	def __init__(self, nick):
 		self.tweets = []
+		self.hashtag = []
 		self.title = ''
 		self.nick = nick
 		self.server = SERVER
-		self.initBeautifulSoup()
+		self.initPseudo()		
 		self.clean()
+		
 
-	def initBeautifulSoup(self):
+	def initPseudo(self):
 		url = "https://twitter.com/{}".format(self.nick)
 
 		content = urllib2.urlopen(url)
@@ -43,6 +46,22 @@ class TwitterToRss:
 				else:
 					self.tweets.append([info, tweet])
 
+
+	def initHashtag(self):
+
+		url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
+
+		content = urllib2.urlopen(url)
+		print 'Connection successful!'
+		soup = BeautifulSoup(content)
+
+		self.title = soup.title.string
+		self.tweets = []
+		pics = []
+
+		for content in soup.findAll("p", {"class": "js-tweet-text tweet-text"}):
+				self.hashtag.append(content)
+
 	def printTweets(self):
 		for tweet in self.tweets:
 			print tweet
@@ -61,7 +80,7 @@ class TwitterToRss:
 					self.tweets[i][1] = re.sub(
 						old, new, str(self.tweets[i][1]))
 
-		return self.tweets
+		# return self.tweets
 
 	def cleanInfo(self):
 		for i, tweet in enumerate(self.tweets):
@@ -87,6 +106,14 @@ class TwitterToRss:
 
 				self.tweets[i][0][2] = re.sub(
 					item, '', str(self.tweets[i][0][2]))
+
+	def cleanHashtag(self):
+		to_delete = self.HASHTAG_DELETE
+		for i, tweet in enumerate(self.hashtag):
+			for item in to_delete:
+				self.hashtag[i] = re.sub(item, '', str(self.hashtag[i]))
+			print self.hashtag[i], '\n\n'
+			
 
 	def cleanTimestamp(self):
 		for i, tweet in enumerate(self.tweets):
@@ -163,16 +190,30 @@ class TwitterToRss:
 			html.write(self.XML_END)
 		html.close()
 
-	def isRssValid(self):
-		with open(self.nick + '.xml', 'w') as html:
+		with open(str(HASHTAG[0]) + '.xml', 'w') as html:
 
-			url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
-			print url
-			content = urllib2.urlopen(url)
-			soup = BeautifulSoup(content)
-			# print soup
-			response = soup.findAll("span", { "class" : "message" })[0].text
-			print response
+			html.write(self.XML_TOP.format(
+				nick=self.nick, title=self.title, server=self.server))
+
+			for i, item in enumerate(self.hashtag):
+
+				print i, item
+				html.write(self.XML_HASH.format(
+					nick=str(HASHTAG[0]), twit=item, i=i))
+
+				html.write(self.XML_ITEM)
+
+			html.write(self.XML_END)
+		html.close()
+
+	def isRssValid(self):
+
+		url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
+		print url
+		content = urllib2.urlopen(url)
+		soup = BeautifulSoup(content)
+		response = soup.findAll("span", { "class" : "message" })[0].text
+		print response
 
 	def activatePics(self):
 		for i, item in enumerate(self.tweets):
@@ -220,6 +261,21 @@ class TwitterToRss:
 		'<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
 		'<span>', '</span>', '</a>', '<b>', '</b>']
 
+	HASHTAG_DELETE = [ 
+	' class="js-tweet-text tweet-text"',
+	' data-query-source="hashtag_click"',
+	' class="twitter-hashtag pretty-link js-nav" dir="ltr"',
+	' rel="nofollow" dir="ltr"',
+	' class="twitter-timeline-link" target="_blank"',
+	' title=".*?"',
+	' class="invisible"',
+	' class="tco-ellipsis"',
+	' class="js-display-url"',
+	'<span>http://</span>',
+	'<p>', '</p>', '<span>', '</span>',
+	' class="twitter-atreply pretty-link" dir="ltr"',
+	' data-expanded-url=".*?"']
+
 	XML_TOP = '''<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 	<channel>
@@ -239,6 +295,14 @@ class TwitterToRss:
 				<pubDate>{date}</pubDate>
 				<description><![CDATA[{author}: {twit}'''
 
+	XML_HASH = '''
+				<item>
+				<title>{nick}</title>
+				<guid>https://twitter.com/search?q={i}{nick}&amp;src=typd</guid>
+				<link>https://twitter.com/search?q={i}{nick}&amp;src=typd</link>
+				<pubDate>Mon, 17 Jun 2013 10:53:02 +0200</pubDate>
+				<description><![CDATA[{twit}'''
+
 	XML_IMG = '''
 				<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
 				'''
@@ -254,8 +318,8 @@ class TwitterToRss:
 
 if __name__ == '__main__':
 
-
-	while 1:
+	i = 1
+	while i == 1:
 
 		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
 		
@@ -280,11 +344,15 @@ if __name__ == '__main__':
 				if PICS == True:
 					tweet.activatePics()
 				tweet.generateHtml()
-				tweet.generateRss()
-				tweet.backupTweet()
-				tweet.isRssValid()
 				
-		time.sleep(TIMER)
+				tweet.initHashtag()
+				tweet.cleanHashtag()
+
+				tweet.generateRss()
+				# tweet.backupTweet()
+				# tweet.isRssValid()
+		i = 2
+		#time.sleep(TIMER)
 
 
 # tweet.printTweets()
