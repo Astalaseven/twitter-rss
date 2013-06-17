@@ -10,7 +10,7 @@ import time
 ### CONSTANTES ###
 TIMER = 600
 SERVER = 'localhost'
-DIR = '/var/www/twitter-rss/' # must exist and must have right to read/write
+DIR = '' # must exist and must have right to read/write
 ACCOUNTS = ['framasoft', 'UrLabBxl']
 HASHTAG = ['framasoft', 'urlab']
 PICS = False
@@ -24,12 +24,12 @@ class TwitterToRss:
 		self.nick = nick
 		self.server = SERVER
 
-		self.initPseudo()
+		self.init()
 	
 		self.clean()
 		
 
-	def initPseudo(self):
+	def init(self):
 
 		if account:
 
@@ -108,14 +108,18 @@ class TwitterToRss:
 			self.tweets[i][0][1] = date
 
 	def generateHtml(self):
-		with open(DIR + self.nick + '.html', 'w') as html:
-			html.write(
-				'<meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>\n\n')
-			for tweet in self.tweets:
+		try:
+			with open(DIR + self.nick + '.html', 'w') as html:
+				html.write(
+					'<meta http-equiv="Content-type" content="text/html; charset=UTF-8"/>\n\n')
+				for tweet in self.tweets:
 
-				html.write(str(tweet[1]) + '\n\n')
+					html.write(str(tweet[1]) + '\n\n')
 
-		html.close()
+			html.close()
+		except IOError:
+			print 'Error: The file ' + self.nick + '.html could not be written into ' + DIR + '.'
+			pass
 
 	def backupTweet(self):
 		update = True
@@ -133,17 +137,21 @@ class TwitterToRss:
 							data = original.read()
 
 		except IOError:
-			print 'Error: The file ' + self.nick + '-backup.xml could not be read'
+			print 'Error: The file ' + self.nick + '-backup.xml could not be read from ' + DIR + '.'
 			pass
 
 		if update:
-			with open(DIR + self.nick + '-backup.xml', 'w') as modified:
-				print 'Update in progress'
+			try:
+				with open(DIR + self.nick + '-backup.xml', 'w') as modified:
+					print 'Update in progress'
 
-				for tweet in self.tweets:
-					modified.write(str(tweet) + '\n\n')
-				modified.write(str(data))
-				print 'Update done'
+					for tweet in self.tweets:
+						modified.write(str(tweet) + '\n\n')
+					modified.write(str(data))
+					print 'Update done'
+			except IOError:
+				print 'Error: The file ' + self.nick + '-backup.xml could not be written into ' + DIR + '.'
+				pass
 		else:
 			print self.nick + ': Already updated, nothing to do'
 
@@ -152,35 +160,39 @@ class TwitterToRss:
 		if not account:
 			self.nick = self.nick + '-search'
 
-		with open(DIR + self.nick + '.xml', 'w') as html:
+		try:
+			with open(DIR + self.nick + '.xml', 'w') as html:
 
-			html.write(self.XML_TOP.format(
-				nick=self.nick, title=self.title, server=self.server))
+				html.write(self.XML_TOP.format(
+					nick=self.nick, title=self.title, server=self.server))
 
-			for i, item in enumerate(self.tweets):
+				for i, item in enumerate(self.tweets):
 
-				date = str(self.tweets[i][0][1])
-				link = str(self.tweets[i][0][0])
-				twit = str(self.tweets[i][1])
-				title = str(self.tweets[i][0][2])
-				author = str(self.tweets[i][0][0]).split('/')[1]
+					date = str(self.tweets[i][0][1])
+					link = str(self.tweets[i][0][0])
+					twit = str(self.tweets[i][1])
+					title = str(self.tweets[i][0][2])
+					author = str(self.tweets[i][0][0]).split('/')[1]
 
-				html.write(self.XML_FOR.format(
-					title=title, link=link, date=date, twit=twit, author=author))
+					html.write(self.XML_FOR.format(
+						title=title, link=link, date=date, twit=twit, author=author))
 
 
-				if PICS == True and self.tweets[i][2]:
+					if PICS == True and self.tweets[i][2]:
 
-					img = self.tweets[i][2][0]
-					alt = self.tweets[i][2][1]
+						img = self.tweets[i][2][0]
+						alt = self.tweets[i][2][1]
 
-					html.write(self.XML_IMG.format(
-						img = img, title = title))
+						html.write(self.XML_IMG.format(
+							img = img, title = title))
 
-				html.write(self.XML_ITEM)
+					html.write(self.XML_ITEM)
 
-			html.write(self.XML_END)
-		html.close()
+				html.write(self.XML_END)
+			html.close()
+		except IOError:
+			print 'Error: The file ' + self.nick + '.xml could not be written into ' + DIR + '.'
+			pass
 
 	def isRssValid(self):
 
@@ -188,8 +200,12 @@ class TwitterToRss:
 		print url
 		content = urllib2.urlopen(url)
 		soup = BeautifulSoup(content)
-		response = soup.findAll("span", { "class" : "message" })[0].text
-		print response
+		if 'This is a valid RSS feed.' in str(soup.text):
+			print 'This is a valid RSS feed.'
+		elif 'This feed does not validate.' in str(soup.text):
+			print 'This feed does not validate.'
+		elif '404: Not Found' in str(soup.text):
+			print 'Server returned HTTP Error 404: Not Found for URL ' + url
 
 	def activatePics(self):
 		for i, item in enumerate(self.tweets):
@@ -304,7 +320,7 @@ if __name__ == '__main__':
 					tweet.generateRss()
 
 					tweet.backupTweet()
-					# tweet.isRssValid()
+					tweet.isRssValid()
 		else:
 			print('Not account specified')
 
@@ -341,6 +357,7 @@ if __name__ == '__main__':
 		else:
 			print('Not hashtag specified')
 
-		time.sleep(TIMER)
+		break
+		#time.sleep(TIMER)
 
 # tweet.printTweets()
