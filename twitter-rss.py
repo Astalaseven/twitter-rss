@@ -11,10 +11,8 @@ import time
 TIMER = 600
 SERVER = 'localhost'
 ACCOUNTS = ['framasoft']
-HASHTAG = ['rss']
+HASHTAG = ['rss', 'framasoft']
 PICS = False
-
-hashtag = False
 
 class TwitterToRss:
 
@@ -24,56 +22,60 @@ class TwitterToRss:
 		self.title = ''
 		self.nick = nick
 		self.server = SERVER
-		if not hashtag:
-			self.initPseudo()
-		# self.initHashtag()	
+
+		self.initPseudo()
+		self.initHashtag()	
 		self.clean()
 		
 
 	def initPseudo(self):
-		url = "https://twitter.com/{}".format(self.nick)
 
-		content = urllib2.urlopen(url)
-		print 'Connection successful!'
-		soup = BeautifulSoup(content)
+		if account:
 
-		self.title = soup.title.string
-		self.tweets = []
-		pics = []
+			url = "https://twitter.com/{}".format(self.nick)
 
-		for content in soup.findAll("div", "content"):
+			content = urllib2.urlopen(url)
+			print 'Connection successful!'
+			soup = BeautifulSoup(content)
 
-			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+			self.title = soup.title.string
+			self.tweets = []
+			pics = []
 
-				if PICS == True:
-					self.tweets.append([info, tweet, pics])
-				else:
-					self.tweets.append([info, tweet])
+			for content in soup.findAll("div", "content"):
+
+				for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+
+					if PICS == True:
+						self.tweets.append([info, tweet, pics])
+					else:
+						self.tweets.append([info, tweet])
 
 
 	def initHashtag(self):
 
-		url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
-		print url
+		if hashtag:
+			url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
+			print url
 
-		content = urllib2.urlopen(url)
-		print 'Connection successful!'
-		soup = BeautifulSoup(content)
-		# print soup
+			content = urllib2.urlopen(url)
+			print 'Connection successful!'
+			soup = BeautifulSoup(content)
+			# print soup
 
-		self.title = soup.title.string
-		self.tweets = []
-		pics = []
+			self.title = soup.title.string
+			self.tweets = []
+			pics = []
 
-		for content in soup.findAll("div", "content"):
+			for content in soup.findAll("div", "content"):
 
-			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+				for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
 
-				if PICS == True:
-					self.tweets.append([info, tweet, pics])
-				else:
-					self.tweets.append([info, tweet])
-		# print self.hashtag[0]
+					if PICS == True:
+						self.tweets.append([info, tweet, pics])
+					else:
+						self.tweets.append([info, tweet])
+			# print self.hashtag[0]
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -166,7 +168,10 @@ class TwitterToRss:
 			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
-		print self.tweets[0]
+
+		if not account:
+			self.nick = self.nick + '-search'
+
 		with open(self.nick + '.xml', 'w') as html:
 
 			html.write(self.XML_TOP.format(
@@ -252,21 +257,6 @@ class TwitterToRss:
 		'<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
 		'<span>', '</span>', '</a>', '<b>', '</b>']
 
-	HASHTAG_DELETE = [ 
-	' class="js-tweet-text tweet-text"',
-	' data-query-source="hashtag_click"',
-	' class="twitter-hashtag pretty-link js-nav" dir="ltr"',
-	' rel="nofollow" dir="ltr"',
-	' class="twitter-timeline-link" target="_blank"',
-	' title=".*?"',
-	' class="invisible"',
-	' class="tco-ellipsis"',
-	' class="js-display-url"',
-	'<span>http://</span>',
-	'<p>', '</p>', '<span>', '</span>',
-	' class="twitter-atreply pretty-link" dir="ltr"',
-	' data-expanded-url=".*?"']
-
 	XML_TOP = '''<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 	<channel>
@@ -285,14 +275,6 @@ class TwitterToRss:
 				<link>https://twitter.com{link}</link>
 				<pubDate>{date}</pubDate>
 				<description><![CDATA[{author}: {twit}'''
-
-	XML_HASH = '''
-				<item>
-				<title>{nick}</title>
-				<guid>https://twitter.com/search?q={i}{nick}&amp;src=typd</guid>
-				<link>https://twitter.com/search?q={i}{nick}&amp;src=typd</link>
-				<pubDate>Mon, 17 Jun 2013 10:53:02 +0200</pubDate>
-				<description><![CDATA[{twit}'''
 
 	XML_IMG = '''
 				<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
@@ -316,13 +298,15 @@ if __name__ == '__main__':
 		
 		for account in ACCOUNTS:
 
+			hashtag = False
+
 			try:
 				tweet = TwitterToRss(account)
-				print 'Hashtag {account} found'.format(account=account)
+				print 'Account {account} found'.format(account=account)
 				error = 200
 			except urllib2.HTTPError as e:
 				if e.code == 404:
-					print 'Hashtag {account} not found'.format(account=account)
+					print 'Account {account} not found'.format(account=account)
 					error = e.code
 					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
 				elif e.code == 101:
@@ -344,17 +328,19 @@ if __name__ == '__main__':
 				# tweet.backupTweet()
 				# tweet.isRssValid()
 
-		for account in HASHTAG:
+		for hashtag in HASHTAG:
+
+			account = False
 
 			try:
-				tweet = TwitterToRss(account)
-				print 'Account {account} found'.format(account=account)
+				tweet = TwitterToRss(hashtag)
+				print 'Hashtag {hashtag} found'.format(hashtag=hashtag)
 				error = 200
 			except urllib2.HTTPError as e:
 				if e.code == 404:
-					print 'Account {account} not found'.format(account=account)
+					print 'Hashtag {hashtag} not found'.format(hashtag=hashtag)
 					error = e.code
-					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+					print 'Error: Twitter returned {error} for {hashtag}'.format(error=error, hashtag=hashtag)
 				elif e.code == 101:
 					print 'Error: Network is unreachable'
 			except urllib2.URLError as e:
