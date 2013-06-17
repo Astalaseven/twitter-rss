@@ -24,7 +24,7 @@ class TwitterToRss:
 		self.server = SERVER
 
 		self.initPseudo()
-		# self.initHashtag()	
+	
 		self.clean()
 		
 
