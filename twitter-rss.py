@@ -8,9 +8,10 @@ import arrow
 import time
 
 ### CONSTANTES ###
-TIMER = 60
+TIMER = 600
 SERVER = 'localhost'
-ACCOUNTS = ['framasoft', 'C4ptainCrunch_', 'qbuyvbivyboibkvy']
+ACCOUNTS = ['framasoft']
+PICS = False
 
 class TwitterToRss:
 
@@ -31,12 +32,16 @@ class TwitterToRss:
 
 		self.title = soup.title.string
 		self.tweets = []
+		pics = []
 
 		for content in soup.findAll("div", "content"):
 
 			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
 
-				self.tweets.append([info, tweet])
+				if PICS == True:
+					self.tweets.append([info, tweet, pics])
+				else:
+					self.tweets.append([info, tweet])
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -143,6 +148,19 @@ class TwitterToRss:
 
 				html.write(self.XML_FOR.format(
 					title=title, link=link, date=date, twit=twit, author=author))
+
+
+				if PICS == True and self.tweets[i][2]:
+
+					img = self.tweets[i][2][0]
+					alt = self.tweets[i][2][1]
+					print img, alt
+
+					html.write(self.XML_IMG.format(
+						img = img, title = title))
+
+				html.write(self.XML_ITEM)
+
 			html.write(self.XML_END)
 		html.close()
 
@@ -152,6 +170,20 @@ class TwitterToRss:
 			url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
 			print url
 			content = urllib2.urlopen(url)
+
+	def activatePics(self):
+		for i, item in enumerate(self.tweets):
+			tweet = str(self.tweets[i][1])
+			if 'pic.twitter.com' in tweet:
+				url = re.findall(r'(\S+.com/\S+)', tweet)
+				for j in url:
+					if 'pic.twitter.com' in j:
+						url = 'http://' + str(re.sub(r'.*pic.twitter.com/(\S+)</a>.*', r'pic.twitter.com/\1', j))
+						content = urllib2.urlopen(url)
+						soup = BeautifulSoup(content)
+						pics = re.findall(r'(https?://pbs.twimg.com/media/\S+.jpg:large)', str(soup))
+						title = soup.title.string
+						self.tweets[i][2] = [pics[0], title]
 
 
 	def clean(self):
@@ -202,16 +234,27 @@ class TwitterToRss:
 				<guid>https://twitter.com{link}</guid>
 				<link>https://twitter.com{link}</link>
 				<pubDate>{date}</pubDate>
-				<description><![CDATA[{author}: {twit}]]></description>
+				<description><![CDATA[{author}: {twit}
+
+				'''
+
+	XML_IMG = '''<img src="{img}" alt="{title}" style="max-width: 50%; height: 50%;"/>
+				'''
+				
+	XML_ITEM = ''']]></description>
 				</item>
 				'''
+
 	XML_END = '''
 	</channel>
 </rss>'''
 
+
 if __name__ == '__main__':
 
-	while 1:
+	i = 1
+
+	while i == 1:
 
 		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
 		
@@ -233,11 +276,16 @@ if __name__ == '__main__':
 				error = -2
 
 			if error == 200:
+				if PICS == True:
+					tweet.activatePics()
 				tweet.generateHtml()
 				tweet.generateRss()
 				tweet.backupTweet()
+				
 
-		time.sleep(TIMER)
+		i = 2
+
+		#time.sleep(TIMER)
 
 
 # tweet.printTweets()
