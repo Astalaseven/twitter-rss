@@ -303,81 +303,80 @@ class TwitterToRss:
 
 #if __name__ == '__main__':
 
-while 1:
 
-	print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss') # debug info
-	
-	if ACCOUNTS:
 
-		for account in ACCOUNTS:
+print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss') # debug info
 
-			account = str(account.split()[0])
+if ACCOUNTS:
 
-			hashtag = False
+	for account in ACCOUNTS:
 
-			try:
-				tweet = TwitterToRss(account)
-				print 'Account {account} found'.format(account=account)
-				error = 200
-			except urllib2.HTTPError as e:
-				if e.code == 404:
-					print 'Account {account} not found'.format(account=account)
-					error = e.code
-					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
-				elif e.code == 101:
-					print 'Error: Network is unreachable'
-				else:
-					error = '???'
-			except urllib2.URLError as e:
-				print 'Invalid URL'
-				error = -2
+		account = str(account.split()[0])
 
-			if error == 200:
-				if PICS == True:
-					tweet.activatePics()
-				tweet.generateHtml()
-				
-				tweet.generateRss()
+		hashtag = False
 
-				tweet.backupTweet()
-				#tweet.isRssValid()
-	else:
-		print('Not account specified')
+		try:
+			tweet = TwitterToRss(account)
+			print 'Account {account} found'.format(account=account)
+			error = 200
+		except urllib2.HTTPError as e:
+			if e.code == 404:
+				print 'Account {account} not found'.format(account=account)
+				error = e.code
+				print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+			elif e.code == 101:
+				print 'Error: Network is unreachable'
+			else:
+				error = '???'
+		except urllib2.URLError as e:
+			print 'Invalid URL'
+			error = -2
 
-	if HASHTAG:
+		if error == 200:
+			if PICS == True:
+				tweet.activatePics()
+			tweet.generateHtml()
+			
+			tweet.generateRss()
 
-		for hashtag in HASHTAG:
+			tweet.backupTweet()
+			#tweet.isRssValid()
+else:
+	print('Not account specified')
 
-			account = False
+if HASHTAG:
 
-			try:
-				tweet = TwitterToRss(hashtag)
-				print 'Hashtag {hashtag} found'.format(hashtag=hashtag)
-				error = 200
-			except urllib2.HTTPError as e:
-				if e.code == 404:
-					print 'Hashtag {hashtag} not found'.format(hashtag=hashtag)
-					error = e.code
-					print 'Error: Twitter returned {error} for {hashtag}'.format(error=error, hashtag=hashtag)
-				elif e.code == 101:
-					print 'Error: Network is unreachable'
-			except urllib2.URLError as e:
-				print 'Invalid URL'
-				error = -2
+	for hashtag in HASHTAG:
 
-			if error == 200:
-				if PICS == True:
-					tweet.activatePics()
-				tweet.generateHtml()
-				
-				tweet.generateRss()
+		account = False
 
-				tweet.backupTweet()
-				# tweet.isRssValid()
-	else:
-		print('Not hashtag specified')
+		try:
+			tweet = TwitterToRss(hashtag)
+			print 'Hashtag {hashtag} found'.format(hashtag=hashtag)
+			error = 200
+		except urllib2.HTTPError as e:
+			if e.code == 404:
+				print 'Hashtag {hashtag} not found'.format(hashtag=hashtag)
+				error = e.code
+				print 'Error: Twitter returned {error} for {hashtag}'.format(error=error, hashtag=hashtag)
+			elif e.code == 101:
+				print 'Error: Network is unreachable'
+		except urllib2.URLError as e:
+			print 'Invalid URL'
+			error = -2
 
-	break
-	# time.sleep(TIMER)
+		if error == 200:
+			if PICS == True:
+				tweet.activatePics()
+			tweet.generateHtml()
+			
+			tweet.generateRss()
+
+			tweet.backupTweet()
+			# tweet.isRssValid()
+else:
+	print('Not hashtag specified')
+
+
 
 # tweet.printTweets()
