@@ -270,7 +270,7 @@ class TwitterToRss:
 
 if __name__ == '__main__':
 
-	while i:
+	while 1:
 
 		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
 		
