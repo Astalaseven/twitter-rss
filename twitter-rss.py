@@ -58,10 +58,12 @@ class TwitterToRss:
 
 
 	def printTweets(self):
+		''' Debug function '''
 		for tweet in self.tweets:
 			print tweet
 
 	def cleanTwit(self):
+		''' Remove all html tags, needed to have a valid RSS '''
 		to_delete = self.TWIT_DELETE
 
 		to_replace = [{'<s>@</s>': '@'},
@@ -76,6 +78,7 @@ class TwitterToRss:
 						old, new, str(self.tweets[i][1]))
 
 	def cleanInfo(self):
+		''' Extract link and date, needed for valid RSS '''
 		for i, tweet in enumerate(self.tweets):
 
 			soup = BeautifulSoup(str(self.tweets[i][0]))
@@ -93,6 +96,7 @@ class TwitterToRss:
 				self.tweets[i][0] = [link, date, plop]
 
 	def cleanTweet(self):
+		''' Remove all uneccessary information from input '''
 		to_delete = self.TWEET_DELETE
 		for i, clean_twit in enumerate(self.tweets):
 			for item in to_delete:
@@ -102,12 +106,14 @@ class TwitterToRss:
 	
 
 	def cleanTimestamp(self):
+		''' Convert timestamp from Twitter to a RSS-valid date '''
 		for i, tweet in enumerate(self.tweets):
 			timestamp = arrow.Arrow.fromtimestamp(float(self.tweets[i][0][1]))
 			date = timestamp.strftime('%a, %d %b %Y %H:%M:%S %z')
 			self.tweets[i][0][1] = date
 
 	def generateHtml(self):
+		''' Create a html file with all the tweets '''
 		try:
 			with open(DIR + self.nick + '.html', 'w') as html:
 				html.write(
@@ -122,6 +128,7 @@ class TwitterToRss:
 			pass
 
 	def backupTweet(self):
+		''' Save all the tweets if they are not already saved '''
 		update = True
 		data = ''
 		try:
@@ -156,6 +163,7 @@ class TwitterToRss:
 			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
+		''' Create a Rss feed with tweets in self.tweets '''
 
 		if not account:
 			self.nick = self.nick + '-search'
@@ -195,6 +203,7 @@ class TwitterToRss:
 			pass
 
 	def isRssValid(self):
+		''' Debug function: check through W3C Feed Validator if feed valid '''
 
 		url = "http://validator.w3.org/feed/check.cgi?url={}/{}.xml".format(self.server, self.nick)
 		print url
@@ -208,6 +217,8 @@ class TwitterToRss:
 			print 'Server returned HTTP Error 404: Not Found for URL ' + url
 
 	def activatePics(self):
+		''' If PICS == True, will append in RSS-feed pic.twitter.com image '''
+
 		for i, item in enumerate(self.tweets):
 			tweet = str(self.tweets[i][1])
 			if 'pic.twitter.com' in tweet:
@@ -289,7 +300,7 @@ if __name__ == '__main__':
 
 	while 1:
 
-		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss')
+		print arrow.utcnow().to('Europe/Brussels').format('YYYY-MM-DD HH:mm:ss') # debug info
 		
 		if ACCOUNTS:
 
@@ -320,7 +331,7 @@ if __name__ == '__main__':
 					tweet.generateRss()
 
 					tweet.backupTweet()
-					tweet.isRssValid()
+					#tweet.isRssValid()
 		else:
 			print('Not account specified')
 
@@ -357,7 +368,6 @@ if __name__ == '__main__':
 		else:
 			print('Not hashtag specified')
 
-		break
-		#time.sleep(TIMER)
+		time.sleep(TIMER)
 
 # tweet.printTweets()
