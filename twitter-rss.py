@@ -14,6 +14,8 @@ ACCOUNTS = ['framasoft']
 HASHTAG = ['rss']
 PICS = False
 
+hashtag = False
+
 class TwitterToRss:
 
 	def __init__(self, nick):
@@ -22,7 +24,9 @@ class TwitterToRss:
 		self.title = ''
 		self.nick = nick
 		self.server = SERVER
-		self.initPseudo()		
+		if not hashtag:
+			self.initPseudo()
+		# self.initHashtag()	
 		self.clean()
 		
 
@@ -50,17 +54,26 @@ class TwitterToRss:
 	def initHashtag(self):
 
 		url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
+		print url
 
 		content = urllib2.urlopen(url)
 		print 'Connection successful!'
 		soup = BeautifulSoup(content)
+		# print soup
 
 		self.title = soup.title.string
 		self.tweets = []
 		pics = []
 
-		for content in soup.findAll("p", {"class": "js-tweet-text tweet-text"}):
-				self.hashtag.append(content)
+		for content in soup.findAll("div", "content"):
+
+			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+
+				if PICS == True:
+					self.tweets.append([info, tweet, pics])
+				else:
+					self.tweets.append([info, tweet])
+		# print self.hashtag[0]
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -106,14 +119,7 @@ class TwitterToRss:
 
 				self.tweets[i][0][2] = re.sub(
 					item, '', str(self.tweets[i][0][2]))
-
-	def cleanHashtag(self):
-		to_delete = self.HASHTAG_DELETE
-		for i, tweet in enumerate(self.hashtag):
-			for item in to_delete:
-				self.hashtag[i] = re.sub(item, '', str(self.hashtag[i]))
-			print self.hashtag[i], '\n\n'
-			
+	
 
 	def cleanTimestamp(self):
 		for i, tweet in enumerate(self.tweets):
@@ -160,6 +166,7 @@ class TwitterToRss:
 			print self.nick + ': Already updated, nothing to do'
 
 	def generateRss(self):
+		print self.tweets[0]
 		with open(self.nick + '.xml', 'w') as html:
 
 			html.write(self.XML_TOP.format(
@@ -184,22 +191,6 @@ class TwitterToRss:
 
 					html.write(self.XML_IMG.format(
 						img = img, title = title))
-
-				html.write(self.XML_ITEM)
-
-			html.write(self.XML_END)
-		html.close()
-
-		with open(str(HASHTAG[0]) + '.xml', 'w') as html:
-
-			html.write(self.XML_TOP.format(
-				nick=self.nick, title=self.title, server=self.server))
-
-			for i, item in enumerate(self.hashtag):
-
-				print i, item
-				html.write(self.XML_HASH.format(
-					nick=str(HASHTAG[0]), twit=item, i=i))
 
 				html.write(self.XML_ITEM)
 
@@ -255,7 +246,7 @@ class TwitterToRss:
 		'<span><span>&nbsp;</span>.*</span>',
 		'<span>http://</span>',
 		' data-pre-embedded="true"',
-		'<p>', '</p>', '<span>', '</span>']
+		'<p>', '</p>', '<span>', '</span>', '<strong>', '</strong>']
 
 	TWEET_DELETE = [
 		'<p>', '</p>', r'<a href=".*?">', '<s>', '</s>', r'http://twitter.com/search\?q=.*?&amp;src=hash',
@@ -327,6 +318,36 @@ if __name__ == '__main__':
 
 			try:
 				tweet = TwitterToRss(account)
+				print 'Hashtag {account} found'.format(account=account)
+				error = 200
+			except urllib2.HTTPError as e:
+				if e.code == 404:
+					print 'Hashtag {account} not found'.format(account=account)
+					error = e.code
+					print 'Error: Twitter returned {error} for {account}'.format(error=error, account=account)
+				elif e.code == 101:
+					print 'Error: Network is unreachable'
+			except urllib2.URLError as e:
+				print 'Invalid URL'
+				error = -2
+
+			if error == 200:
+				if PICS == True:
+					tweet.activatePics()
+				tweet.generateHtml()
+				
+				tweet.generateRss()
+
+				# tweet.initHashtag()
+
+				# tweet.generateRss()
+				# tweet.backupTweet()
+				# tweet.isRssValid()
+
+		for account in HASHTAG:
+
+			try:
+				tweet = TwitterToRss(account)
 				print 'Account {account} found'.format(account=account)
 				error = 200
 			except urllib2.HTTPError as e:
@@ -345,12 +366,9 @@ if __name__ == '__main__':
 					tweet.activatePics()
 				tweet.generateHtml()
 				
-				tweet.initHashtag()
-				tweet.cleanHashtag()
-
 				tweet.generateRss()
-				# tweet.backupTweet()
-				# tweet.isRssValid()
+
+
 		i = 2
 		#time.sleep(TIMER)
 
