@@ -24,7 +24,7 @@ class TwitterToRss:
 		self.server = SERVER
 
 		self.initPseudo()
-		self.initHashtag()	
+		# self.initHashtag()	
 		self.clean()
 		
 
@@ -34,45 +34,50 @@ class TwitterToRss:
 
 			url = "https://twitter.com/{}".format(self.nick)
 
-			content = urllib2.urlopen(url)
-			print 'Connection successful!'
-			soup = BeautifulSoup(content)
+		elif hashtag:
 
-			self.title = soup.title.string
-			self.tweets = []
-			pics = []
-
-			for content in soup.findAll("div", "content"):
-
-				for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
-
-					if PICS == True:
-						self.tweets.append([info, tweet, pics])
-					else:
-						self.tweets.append([info, tweet])
-
-
-	def initHashtag(self):
-
-		if hashtag:
 			url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
 
-			content = urllib2.urlopen(url)
-			print 'Connection successful!'
-			soup = BeautifulSoup(content)
+		content = urllib2.urlopen(url)
+		print 'Connection successful!'
+		soup = BeautifulSoup(content)
 
-			self.title = soup.title.string
-			self.tweets = []
-			pics = []
+		self.title = soup.title.string
+		self.tweets = []
+		pics = []
 
-			for content in soup.findAll("div", "content"):
+		for content in soup.findAll("div", "content"):
 
-				for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
 
-					if PICS == True:
-						self.tweets.append([info, tweet, pics])
-					else:
-						self.tweets.append([info, tweet])
+				if PICS == True:
+					self.tweets.append([info, tweet, pics])
+				else:
+					self.tweets.append([info, tweet])
+
+
+	# def initHashtag(self):
+
+	# 	if hashtag:
+
+	# 		url = "https://twitter.com/search?q=%23{}&src=typd".format(self.nick)
+
+	# 		content = urllib2.urlopen(url)
+	# 		print 'Connection successful!'
+	# 		soup = BeautifulSoup(content)
+
+	# 		self.title = soup.title.string
+	# 		self.tweets = []
+	# 		pics = []
+
+	# 		for content in soup.findAll("div", "content"):
+
+	# 			for info, tweet in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+
+	# 				if PICS == True:
+	# 					self.tweets.append([info, tweet, pics])
+	# 				else:
+	# 					self.tweets.append([info, tweet])
 
 	def printTweets(self):
 		for tweet in self.tweets:
@@ -348,7 +353,7 @@ if __name__ == '__main__':
 				
 				tweet.generateRss()
 
-				# tweet.backupTweet()
+				tweet.backupTweet()
 				# tweet.isRssValid()
 
 
