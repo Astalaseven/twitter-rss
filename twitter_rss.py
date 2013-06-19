@@ -22,7 +22,7 @@ class Tweet(object):
             span = meta.find('span')
             timestamp = re.sub(r'\(u\'data-time\', u\'(.*)\'\)', r'\1', str(span.attrs[1]))
 
-            self.date = self.cleanTimestamp(timestamp)
+            self.date = self.clean_timestamp(timestamp)
             # print self.link.split('/')[1]
             self.author = self.link.split('/')[1]
 
@@ -51,7 +51,7 @@ class Tweet(object):
 
         return [output, title]
 
-    def cleanTimestamp(self,timestamp):
+    def clean_timestamp(self,timestamp):
         return arrow.Arrow.fromtimestamp(float(timestamp))
 
     def to_jinja2(self):
@@ -110,7 +110,7 @@ class TweetGetter(object):
             except AttributeError:
                 descriptor = self.username
             template = Template(template_file.read())
-            return template.render(server=server, title=self.url, descriptor=descriptor, url=self.url, tweets=items)
+            return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
 
 
 class UserTweetGetter(TweetGetter):

@@ -13,8 +13,19 @@ def hello():
 
 @app.route('/<username>.xml')
 def twitter_to_xml(username):
-    tweets = twitter_rss.UserTweetGetter(username)
-    return tweets.to_rss()
+    try:
+        with open(username + '.xml') as tweets:
+            tweets = tweets.read()
+            return tweets
+    except IOError:
+        print 'File does not exist: Creating feed...'
+
+        tweets = twitter_rss.UserTweetGetter(username)
+        with open(username + '.xml', 'w') as cache:
+            cache.write(tweets.to_rss().encode('utf-8'))
+        cache.close()
+
+        return tweets.to_rss()
 
 @app.route('/tag-<username>.xml')
 def hashtag_to_xml(username):
