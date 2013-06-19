@@ -91,16 +91,19 @@ class Tweet(object):
 class TweetGetter(object):
 
     def parse_twitter(self):
-        content = urllib2.urlopen(self.url)
-        print 'Connection successful!'
-        soup = BeautifulSoup(content)
+        try:
+            content = urllib2.urlopen(self.url)
+            print 'Connection successful!'
+            soup = BeautifulSoup(content)
 
-        self.title = soup.title.string
-        self.tweets = []
+            self.title = soup.title.string
+            self.tweets = []
 
-        for content in soup.findAll("div", "content"):
-            for meta, text in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
-                self.tweets.append(Tweet(text, meta))
+            for content in soup.findAll("div", "content"):
+                for meta, text in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+                    self.tweets.append(Tweet(text, meta))
+        except urllib2.HTTPError:
+            print 'Error 404: Account not found'
 
     def to_rss(self, server='localhost'):
         with open('rss-model.tpl') as template_file:

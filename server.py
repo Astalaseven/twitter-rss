@@ -31,32 +31,51 @@ def user_to_xml(feed):
     try:
         with open('user/' + feed + '.xml') as tweets:
             tweets = tweets.read()
-            return tweets
+            if not tweets:
+                return redirect(url_for('index'))
+            else:
+                return tweets
     except IOError:
-        print 'File does not exist: Creating feed...'
+        try:
+            tweets = twitter_rss.UserTweetGetter(feed)
 
-        tweets = twitter_rss.UserTweetGetter(feed)
-        with open('user/' + feed + '.xml', 'w') as cache:
-            cache.write(tweets.to_rss().encode('utf-8'))
-        cache.close()
+            print 'File does not exist: Creating feed...'
+            with open('user/' + feed + '.xml', 'w') as cache:
+                cache.write(tweets.to_rss().encode('utf-8'))
+            cache.close()
+            return tweets.to_rss()
 
-        return tweets.to_rss()
+        except AttributeError:
+            return redirect(url_for('index'))
+        except IOError:
+            return 'File could not be written'
+            
+
+            
 
 @app.route('/htag/<feed>.xml')
 def hashtag_to_xml(feed):
     try:
         with open('htag/' + feed + '.xml') as tweets:
             tweets = tweets.read()
-            return tweets
+            if not tweets:
+                return redirect(url_for('index'))
+            else:
+                return tweets
     except IOError:
-        print 'File does not exist: Creating feed...'
+        try:
+            tweets = twitter_rss.UserTweetGetter(feed)
 
-        tweets = twitter_rss.HashtagTweetGetter(feed)
-        with open('htag/' + feed + '.xml', 'w') as cache:
-            cache.write(tweets.to_rss().encode('utf-8'))
-        cache.close()
+            print 'File does not exist: Creating feed...'
+            with open('htag/' + feed + '.xml', 'w') as cache:
+                cache.write(tweets.to_rss().encode('utf-8'))
+            cache.close()
+            return tweets.to_rss()
 
-        return tweets.to_rss()
+        except AttributeError:
+            return redirect(url_for('index'))
+        except IOError:
+            return 'File could not be written'
 
 # @app.route('/feed', methods=['POST'])
 # def handle_username():
@@ -99,12 +118,6 @@ def hashtag_to_xml(feed):
 #     return tweets.to_rss()
 
 @app.errorhandler(404)
-def page_not_found(error):
-    return redirect(url_for('index'))
-    # error = 'Account or hashtag not found!'
-    # return render_template('index.tpl', error=error)
-
-@app.errorhandler(500)
 def page_not_found(error):
     return redirect(url_for('index'))
 
