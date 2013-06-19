@@ -106,14 +106,17 @@ class TweetGetter(object):
             print 'Error 404: Account not found'
 
     def to_rss(self, server='localhost'):
-        with open('rss-model.tpl') as template_file:
-            items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))
-            try:
-                descriptor = '#' + self.hashtag
-            except AttributeError:
-                descriptor = self.username
-            template = Template(template_file.read())
-            return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
+        try:
+            with open('rss-model.tpl') as template_file:
+                items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))
+                try:
+                    descriptor = '#' + self.hashtag
+                except AttributeError:
+                    descriptor = self.username
+                template = Template(template_file.read())
+                return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
+        except IOError:
+            return 'File could not be open'
 
 
 class UserTweetGetter(TweetGetter):
