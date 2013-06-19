@@ -16,6 +16,11 @@ def twitter_to_xml(username):
     tweets = twitter_rss.UserTweetGetter(username)
     return tweets.to_rss()
 
+@app.route('/tag-<username>.xml')
+def hashtag_to_xml(username):
+    tweets = twitter_rss.HashtagTweetGetter(username)
+    return tweets.to_rss()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

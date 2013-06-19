@@ -32,32 +32,35 @@ class Tweet(object):
     def __str__(self):
         return self.clean_text(True)
 
-    def clean_text(self, nazi=False):
+    def clean_text(self):
         output = self.raw_text
-        if not nazi:
-            to_delete = self.TWIT_DELETE
-            to_replace = [{'<s>@</s>': '@'},
-                          {'href="/': 'href="http://twitter.com/'}]
-            for item in to_delete:
-                output = re.sub(item, '', output)
-            for item in to_replace:
-                for old, new in item.items():
-                    output = re.sub(old, new, output)
-        else:
-            to_delete = self.TWEET_DELETE
-            for item in to_delete:
-                output = re.sub(item, '', output)
-        return output
+
+        to_delete = self.TWIT_DELETE
+        to_replace = [{'<s>@</s>': '@'},
+                      {'href="/': 'href="http://twitter.com/'}]
+        for item in to_delete:
+            output = re.sub(item, '', output)
+        for item in to_replace:
+            for old, new in item.items():
+                output = re.sub(old, new, output)
+
+        title = output
+        to_delete = self.TWEET_DELETE
+        for item in to_delete:
+            title = re.sub(item, '', title)
+
+        return [output, title]
 
     def cleanTimestamp(self,timestamp):
         return arrow.Arrow.fromtimestamp(float(timestamp))
 
     def to_jinja2(self):
         return {
+            'title' : self.clean_text()[1],
             'author'  : self.author,
             'link' : self.link,
             'date' : self.date.strftime('%a, %d %b %Y %H:%M:%S %z'),
-            'content' : self.clean_text(True),
+            'content' : self.clean_text()[0],
         }
 
     TWIT_DELETE = [
@@ -102,8 +105,12 @@ class TweetGetter(object):
     def to_rss(self, server='localhost'):
         with open('rss-model.tpl') as template_file:
             items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))
+            try:
+                descriptor = '#' + self.hashtag
+            except AttributeError:
+                descriptor = self.username
             template = Template(template_file.read())
-            return template.render(server=server, title=self.url, url=self.url, tweets=items)
+            return template.render(server=server, title=self.url, descriptor=descriptor, url=self.url, tweets=items)
 
 
 class UserTweetGetter(TweetGetter):
@@ -117,7 +124,7 @@ class UserTweetGetter(TweetGetter):
 class HashtagTweetGetter(TweetGetter):
     def __init__(self, hashtag, get_pics = False):
         self.hashtag = hashtag
-        self.url = "https://twitter.com/search?q=%23{}&src=typd".format(self.hashtag)
+        self.url = "https://twitter.com/search?q=%23{}".format(self.hashtag)
         self.pics = get_pics
 
         self.parse_twitter()
