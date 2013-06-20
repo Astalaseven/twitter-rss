@@ -38,10 +38,10 @@ def user_to_xml(feed):
     except IOError:
         tweets = twitter_rss.UserTweetGetter(feed)
         try:
-            err = tweets.to_rss().encode('utf-8')
+            data = tweets.to_rss().encode('utf-8')
             print 'File does not exist: Creating feed...'
             with open('user/' + feed + '.xml', 'w') as cache:
-                cache.write(tweets.to_rss().encode('utf-8'))
+                cache.write(data)
             cache.close()
             error = tweets.to_rss()
 
@@ -64,10 +64,10 @@ def htag_to_xml(feed):
     except IOError:
         tweets = twitter_rss.HashtagTweetGetter(feed)
         try:
-            err = tweets.to_rss().encode('utf-8')
+            data = tweets.to_rss().encode('utf-8')
             print 'File does not exist: Creating feed...'
             with open('htag/' + feed + '.xml', 'w') as cache:
-                cache.write(tweets.to_rss().encode('utf-8'))
+                cache.write(data)
             cache.close()
             error = tweets.to_rss()
 

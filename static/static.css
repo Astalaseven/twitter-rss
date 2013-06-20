@@ -1,0 +1,17 @@
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+  text-align: center;
+  margin-bottom: 200px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+h1 {
+  height:200px;
+  line-height:200px;
+}
+
+form {
+  margin: 0 0 20px;
+}
