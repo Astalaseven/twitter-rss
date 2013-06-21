@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import twitter_rss
 import time
 import subprocess
@@ -11,12 +14,12 @@ try:
     while 1:
         print 'Updating ALL THE FEEDS!'
         try:
-            with open('user/user.txt', 'r') as usernames:
+            with open(config.DIR + 'user/user.txt', 'r') as usernames:
                 for user in usernames:
                     twitter_rss.UserTweetGetter(user)
             usernames.close()
 
-            with open('htag/htag.txt', 'r') as hashtags:
+            with open(config.DIR + 'htag/htag.txt', 'r') as hashtags:
                 for htag in hashtags:
                     twitter_rss.HashtagTweetGetter(user)
             hashtags.close()
