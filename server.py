@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template, request, redirect, url_for
-import time
 import twitter_rss
 import config
-# from jinja2 import Template
 
 app = Flask(__name__)
 
@@ -33,7 +31,8 @@ def feed_to_xml(feed, path):
         with open(config.DIR + path + '/' + feed + '.xml') as tweets:
             tweets = tweets.read()
             if not tweets:
-                error = redirect(url_for('index'))
+                err = 'Cache is empty'
+                error = render_template('index.tpl', err=err)
             else:
                 error = tweets
     except IOError:
@@ -44,12 +43,14 @@ def feed_to_xml(feed, path):
                 tweets = twitter_rss.HashtagTweetGetter(feed)
             error = tweets.to_rss().encode('utf-8')
         except AttributeError:
-            error = redirect(url_for('index'))
+            err = 'User not found'
+            error = render_template('index.tpl', err=err)
         write_data_to_file(tweets, feed, path)
-        save_feed_for_updating(feed, path)      
+        save_feed_for_updating(feed, path)
     return error
            
 def write_data_to_file(tweets, feed, path):
+    err=None
     try:
         data = tweets.to_rss().encode('utf-8')
         print 'File does not exist: Creating feed...'
@@ -58,9 +59,11 @@ def write_data_to_file(tweets, feed, path):
         cache.close()
         error = tweets.to_rss()
     except IOError:
-        error = 'File could not be written'
+        err = 'File could not be written'
     except AttributeError:
-        error = redirect(url_for('index'))
+        err = 'User not found'
+    error = render_template('index.tpl', err=err)
+    return error
 
 def save_feed_for_updating(feed, path):
     try:
@@ -71,13 +74,14 @@ def save_feed_for_updating(feed, path):
         print 'Could not save ' + feed + ' in ' + path
 
 
-
 @app.errorhandler(404)
-def page_not_found(error):
-    return redirect(url_for('index'))
+def page_not_found(code):
+    err = 'User not found'
+    error = render_template('index.tpl', err=err)
+    return error
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    # app.run(host='0.0.0.0')
+    # app.run(debug=True)
+    app.run(host='0.0.0.0')
     # app.run()

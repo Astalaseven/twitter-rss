@@ -21,6 +21,8 @@
 	<input type="submit" id="htagIt" value="RSS it!">
 	</form>
 
+	{% if err %} <p class=error><strong>Error:</strong> </p> <p>{{ err }}</p> {% endif %}
+
 </body>
 	
 	<footer>
