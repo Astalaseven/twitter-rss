@@ -5,6 +5,7 @@ from BeautifulSoup import BeautifulSoup
 import urllib2
 import re
 import arrow
+import config
 from jinja2 import Template
 
 class Tweet(object):
@@ -104,7 +105,7 @@ class TweetGetter(object):
         except urllib2.HTTPError:
             print 'Error 404: Account not found'
 
-    def to_rss(self, server='localhost'):
+    def to_rss(self, server=config.SERVER):
         try:
             with open('rss-model.tpl') as template_file:
                 items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))

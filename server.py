@@ -4,8 +4,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 import time
 import twitter_rss
+import config
 # from jinja2 import Template
-host = 'localhost:5000'
 
 app = Flask(__name__)
 
