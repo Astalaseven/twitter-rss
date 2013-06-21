@@ -21,10 +21,6 @@
 	<input type="submit" id="htagIt" value="RSS it!">
 	</form>
 
-	{% if error %}
-    <p class=error><strong>Error:</strong> {{ error }}
-  	{% endif %}
-
 </body>
 
 </html>

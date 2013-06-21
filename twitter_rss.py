@@ -23,7 +23,6 @@ class Tweet(object):
             timestamp = re.sub(r'\(u\'data-time\', u\'(.*)\'\)', r'\1', str(span.attrs[1]))
 
             self.date = self.clean_timestamp(timestamp)
-            # print self.link.split('/')[1]
             self.author = self.link.split('/')[1]
 
     def __repr__(self):

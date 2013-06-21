@@ -9,113 +9,125 @@ host = 'localhost:5000'
 
 app = Flask(__name__)
 
+
 @app.route('/')
 def index():
     return render_template('index.tpl')
 
-
-
 @app.route('/user', methods=['POST'])
 def handle_user():
     feed = request.form['user_data']
-    return redirect(url_for('user_to_xml', feed=feed))
+    path = request.path
+    return redirect(url_for('feed_to_xml', feed=feed, path=path))
 
 @app.route('/htag', methods=['POST'])
 def handle_htag():
     feed = request.form['user_data']
-    return redirect(url_for('htag_to_xml', feed=feed))
+    path = request.path
+    return redirect(url_for('feed_to_xml', feed=feed, path=path))
 
 
-@app.route('/user/<feed>.xml')
-def user_to_xml(feed):
+@app.route('/<path>/<feed>.xml')
+def feed_to_xml(feed, path):
     try:
-        with open('user/' + feed + '.xml') as tweets:
+        with open(path + '/' + feed + '.xml') as tweets:
             tweets = tweets.read()
             if not tweets:
                 error = redirect(url_for('index'))
             else:
                 error = tweets
+        print 'file open'
     except IOError:
-        tweets = twitter_rss.UserTweetGetter(feed)
         try:
-            data = tweets.to_rss().encode('utf-8')
-            print 'File does not exist: Creating feed...'
-            with open('user/' + feed + '.xml', 'w') as cache:
-                cache.write(data)
-            cache.close()
-            error = tweets.to_rss()
-
-        except IOError:
-            error = 'File could not be written'
+            if path == 'user':
+                tweets = twitter_rss.UserTweetGetter(feed)
+            elif path == 'htag':
+                tweets = twitter_rss.HashtagTweetGetter(feed)
+            error = tweets.to_rss().encode('utf-8')
         except AttributeError:
             error = redirect(url_for('index'))
+        write_data_to_file(tweets, feed, path)      
     return error
            
-
-@app.route('/htag/<feed>.xml')
-def htag_to_xml(feed):
+def write_data_to_file(tweets, feed, path):
     try:
-        with open('htag/' + feed + '.xml') as tweets:
-            tweets = tweets.read()
-            if not tweets:
-                error = redirect(url_for('index'))
-            else:
-                error = tweets
+        data = tweets.to_rss().encode('utf-8')
+        print 'File does not exist: Creating feed...'
+        with open(path + '/' + feed + '.xml', 'w') as cache:
+            cache.write(data)
+        cache.close()
+        error = tweets.to_rss()
     except IOError:
-        tweets = twitter_rss.HashtagTweetGetter(feed)
-        try:
-            data = tweets.to_rss().encode('utf-8')
-            print 'File does not exist: Creating feed...'
-            with open('htag/' + feed + '.xml', 'w') as cache:
-                cache.write(data)
-            cache.close()
-            error = tweets.to_rss()
+        error = 'File could not be written'
+    except AttributeError:
+        error = redirect(url_for('index'))
 
-        except IOError:
-            error = 'File could not be written'
-        except AttributeError:
-            error = redirect(url_for('index'))
-    return error
 
-# @app.route('/feed', methods=['POST'])
-# def handle_username():
+
+# @app.route('/user', methods=['POST'])
+# def handle_user():
+#     plop =  request.form
+#     print plop
+#     feed = request.form['user_data']
+#     return redirect(url_for('user_to_xml', feed=feed))
+
+# @app.route('/htag', methods=['POST'])
+# def handle_htag():
+#     feed = request.form['user_data']
+#     return redirect(url_for('htag_to_xml', feed=feed))
+
+
+# @app.route('/user/<feed>.xml')
+# def user_to_xml(feed):
 #     try:
-#         return redirect(url_for('twitter_to_xml', username=request.form['rss']))
-#     except:
-#         return redirect(url_for('hashtag_to_xml', hashtag=request.form['rss']))
-
-
-# @app.route('/<username>.xml')
-# def twitter_to_xml(username):
-#     try:
-#         with open(username + '.xml') as tweets:
+#         with open('user/' + feed + '.xml') as tweets:
 #             tweets = tweets.read()
-#             return tweets
+#             if not tweets:
+#                 error = redirect(url_for('index'))
+#             else:
+#                 error = tweets
 #     except IOError:
-#         print 'File does not exist: Creating feed...'
+#         tweets = twitter_rss.UserTweetGetter(feed)
+#         try:
+#             data = tweets.to_rss().encode('utf-8')
+#             print 'File does not exist: Creating feed...'
+#             with open('user/' + feed + '.xml', 'w') as cache:
+#                 cache.write(data)
+#             cache.close()
+#             error = tweets.to_rss()
 
-#         tweets = twitter_rss.UserTweetGetter(username)
-#         with open(username + '.xml', 'w') as cache:
-#             cache.write(tweets.to_rss().encode('utf-8'))
-#         cache.close()
+#         except IOError:
+#             error = 'File could not be written'
+#         except AttributeError:
+#             error = redirect(url_for('index'))
+#     return error
+           
 
-#         return tweets.to_rss()
-
-# @app.route('/tag-<hashtag>.xml')
-# def hashtag_to_xml(hashtag):
+# @app.route('/htag/<feed>.xml')
+# def htag_to_xml(feed):
 #     try:
-#         with open('tag-' + hashtag + '.xml') as tweets:
+#         with open('htag/' + feed + '.xml') as tweets:
 #             tweets = tweets.read()
-#             return tweets
+#             if not tweets:
+#                 error = redirect(url_for('index'))
+#             else:
+#                 error = tweets
 #     except IOError:
-#         print 'File does not exist: Creating feed...'
+#         tweets = twitter_rss.HashtagTweetGetter(feed)
+#         try:
+#             data = tweets.to_rss().encode('utf-8')
+#             print 'File does not exist: Creating feed...'
+#             with open('htag/' + feed + '.xml', 'w') as cache:
+#                 cache.write(data)
+#             cache.close()
+#             error = tweets.to_rss()
 
-#         tweets = twitter_rss.HashtagTweetGetter(hashtag)
-#         with open('tag-' + hashtag + '.xml', 'w') as cache:
-#             cache.write(tweets.to_rss().encode('utf-8'))
-#         cache.close()
-    
-#     return tweets.to_rss()
+#         except IOError:
+#             error = 'File could not be written'
+#         except AttributeError:
+#             error = redirect(url_for('index'))
+#     return error
+
 
 @app.errorhandler(404)
 def page_not_found(error):
