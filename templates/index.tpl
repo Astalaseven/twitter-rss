@@ -22,5 +22,9 @@
 	</form>
 
 </body>
+	
+	<footer>
+		<p><a href="https://github.com/Astalaseven/twitter-rss">Source code on GitHub</a></p>
+	</footer>
 
 </html>
