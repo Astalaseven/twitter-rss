@@ -36,7 +36,6 @@ def feed_to_xml(feed, path):
                 error = redirect(url_for('index'))
             else:
                 error = tweets
-        print 'file open'
     except IOError:
         try:
             if path == 'user':
@@ -46,7 +45,8 @@ def feed_to_xml(feed, path):
             error = tweets.to_rss().encode('utf-8')
         except AttributeError:
             error = redirect(url_for('index'))
-        write_data_to_file(tweets, feed, path)      
+        write_data_to_file(tweets, feed, path)
+        save_feed_for_updating(feed, path)      
     return error
            
 def write_data_to_file(tweets, feed, path):
@@ -61,6 +61,14 @@ def write_data_to_file(tweets, feed, path):
         error = 'File could not be written'
     except AttributeError:
         error = redirect(url_for('index'))
+
+def save_feed_for_updating(feed, path):
+    try:
+        with open(path + '/' + path + '.txt', 'a') as save:
+            save.write(feed + '\n')
+        save.close()
+    except IOError:
+        print 'Could not save ' + feed + ' in ' + path
 
 
 
