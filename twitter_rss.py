@@ -14,7 +14,6 @@ class Tweet(object):
         self.raw_text = str(text).decode(encoding='UTF-8')
         self.set_info(meta)
         
-
     def set_info(self, meta):
         for href in meta.findAll('a'):
             self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(
@@ -130,7 +129,6 @@ class TweetGetter(object):
                 return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
         except IOError:
             return 'File could not be open'
-
 
 class UserTweetGetter(TweetGetter):
     def __init__(self, username):
