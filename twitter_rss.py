@@ -10,10 +10,10 @@ from jinja2 import Template
 
 class Tweet(object):
 
-    def __init__(self, text, meta, get_pics=False):
+    def __init__(self, text, meta):
         self.raw_text = str(text).decode(encoding='UTF-8')
         self.set_info(meta)
-        self.get_pics = get_pics
+        
 
     def set_info(self, meta):
         for href in meta.findAll('a'):
@@ -76,8 +76,6 @@ class Tweet(object):
             template.update({'pic' : self.get_pic()})
         return template
 
-        # {'content': u'Zoo de Londres - 1937 - Domaine Public... (vous m&#39;en faites la l\xe9gende ?) <a href="http://t.co/pGSN2vmoYf">pic.twitter.com/pGSN2vmoYf</a>', 'pic': 'https://pbs.twimg.com/media/BNOgRWzCYAApAyT.jpg:large', 'link': '/framaka/status/347797816271331328', 'author': 'framaka', 'date': 'Thu, 20 Jun 2013 21:27:15 +0200', 'alt': u'Twitter / framaka : Zoo de Londres - 1937 - Domaine ...', 'title': u'Zoo de Londres - 1937 - Domaine Public... (vous m&#39;en faites la l\xe9gende ?) pic.twitter.com/pGSN2vmoYf'}
-
     TWIT_DELETE = [
         ' class="js-tweet-text tweet-text"',
         ' class="twitter-atreply pretty-link"',
@@ -135,34 +133,15 @@ class TweetGetter(object):
 
 
 class UserTweetGetter(TweetGetter):
-    def __init__(self, username, get_pics = False):
+    def __init__(self, username):
         self.username = username
         self.url = "https://twitter.com/{}".format(self.username)
-        # self.pics = get_pics
 
         self.parse_twitter()
 
 class HashtagTweetGetter(TweetGetter):
-    def __init__(self, hashtag, get_pics = False):
+    def __init__(self, hashtag):
         self.hashtag = hashtag
         self.url = "https://twitter.com/search?q=%23{}".format(self.hashtag)
-        # self.pics = get_pics
 
         self.parse_twitter()
-
-
-#     def activatePics(self):
-#         ''' If PICS == True, will append in RSS-feed pic.twitter.com image '''
-
-#         for i, item in enumerate(self.tweets):
-#             tweet = str(self.tweets[i][1])
-#             if 'pic.twitter.com' in tweet:
-#                 url = re.findall(r'(\S+.com/\S+)', tweet)
-#                 for j in url:
-#                     if 'pic.twitter.com' in j:
-#                         url = 'http://' + str(re.sub(r'.*pic.twitter.com/(\S+)</a>.*', r'pic.twitter.com/\1', j))
-#                         content = urllib2.urlopen(url)
-#                         soup = BeautifulSoup(content)
-#                         pics = re.findall(r'(https?://pbs.twimg.com/media/\S+.jpg:large)', str(soup))
-#                         title = soup.title.string
-#                         self.tweets[i][2] = [pics[0], title]
