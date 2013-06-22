@@ -51,17 +51,32 @@ class Tweet(object):
 
         return [output, title]
 
+    def get_pic(self):
+        pic = None
+        if 'pic.twitter.com' in self.raw_text:
+            pic_url = 'http://' + str(re.sub(r'.*dir="ltr">pic.twitter.com/(.*?)</a>.*', r'pic.twitter.com/\1', self.raw_text.encode('utf8')))
+
+            content = urllib2.urlopen(pic_url)
+            soup = BeautifulSoup(content)
+            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+.jpg:large)', str(soup))[0]
+        return pic
+
     def clean_timestamp(self,timestamp):
         return arrow.Arrow.fromtimestamp(float(timestamp))
 
     def to_jinja2(self):
-        return {
-            'title' : self.clean_text()[1],
-            'author'  : self.author,
-            'link' : self.link,
-            'date' : self.date.strftime('%a, %d %b %Y %H:%M:%S %z'),
-            'content' : self.clean_text()[0],
-        }
+        template = {
+                'title' : self.clean_text()[1],
+                'author'  : self.author,
+                'link' : self.link,
+                'date' : self.date.strftime('%a, %d %b %Y %H:%M:%S %z'),
+                'content' : self.clean_text()[0]
+            }
+        if config.PICS is True and self.get_pic() != None:
+            template.update({'pic' : self.get_pic()})
+        return template
+
+        # {'content': u'Zoo de Londres - 1937 - Domaine Public... (vous m&#39;en faites la l\xe9gende ?) <a href="http://t.co/pGSN2vmoYf">pic.twitter.com/pGSN2vmoYf</a>', 'pic': 'https://pbs.twimg.com/media/BNOgRWzCYAApAyT.jpg:large', 'link': '/framaka/status/347797816271331328', 'author': 'framaka', 'date': 'Thu, 20 Jun 2013 21:27:15 +0200', 'alt': u'Twitter / framaka : Zoo de Londres - 1937 - Domaine ...', 'title': u'Zoo de Londres - 1937 - Domaine Public... (vous m&#39;en faites la l\xe9gende ?) pic.twitter.com/pGSN2vmoYf'}
 
     TWIT_DELETE = [
         ' class="js-tweet-text tweet-text"',
@@ -123,7 +138,7 @@ class UserTweetGetter(TweetGetter):
     def __init__(self, username, get_pics = False):
         self.username = username
         self.url = "https://twitter.com/{}".format(self.username)
-        self.pics = get_pics
+        # self.pics = get_pics
 
         self.parse_twitter()
 
@@ -131,7 +146,7 @@ class HashtagTweetGetter(TweetGetter):
     def __init__(self, hashtag, get_pics = False):
         self.hashtag = hashtag
         self.url = "https://twitter.com/search?q=%23{}".format(self.hashtag)
-        self.pics = get_pics
+        # self.pics = get_pics
 
         self.parse_twitter()
 

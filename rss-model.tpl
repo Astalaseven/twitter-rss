@@ -15,6 +15,9 @@
             <pubDate>{{tweet.date}}</pubDate>
             <description><![CDATA[
                 {{tweet.author}}: {{tweet.content}}
+                {% if tweet.pic %}
+                <img src="{{tweet.pic}}" alt="{{tweet.title}}" style="margin: 25px 25px 10px"; height: auto; />
+                {% endif %}
             ]]></description>
             </item>
         {% endfor %}
