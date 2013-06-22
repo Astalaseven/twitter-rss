@@ -3,5 +3,5 @@
 
 TIMER = 600
 SERVER = 'localhost:5000'
-DIR = '/var/www/twitter-rss/' # must exist and must have right to read/write
-PICS = False
+DIR = '/var/www/' # must exist and must have right to read/write
+PICS = True

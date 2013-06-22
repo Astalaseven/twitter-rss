@@ -10,10 +10,11 @@ from jinja2 import Template
 
 class Tweet(object):
 
-    def __init__(self, text, meta):
+    def __init__(self, text, meta, get_pics=False):
         self.raw_text = str(text).decode(encoding='UTF-8')
         self.set_info(meta)
-        
+        self.get_pics = get_pics
+
     def set_info(self, meta):
         for href in meta.findAll('a'):
             self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(
@@ -130,15 +131,16 @@ class TweetGetter(object):
         except IOError:
             return 'File could not be open'
 
+
 class UserTweetGetter(TweetGetter):
-    def __init__(self, username):
+    def __init__(self, username, get_pics = False):
         self.username = username
         self.url = "https://twitter.com/{}".format(self.username)
 
         self.parse_twitter()
 
 class HashtagTweetGetter(TweetGetter):
-    def __init__(self, hashtag):
+    def __init__(self, hashtag, get_pics = False):
         self.hashtag = hashtag
         self.url = "https://twitter.com/search?q=%23{}".format(self.hashtag)
 
