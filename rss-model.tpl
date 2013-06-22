@@ -16,7 +16,7 @@
             <description><![CDATA[
                 {{tweet.author}}: {{tweet.content}}
                 {% if tweet.pic %}
-                <p><img src="{{tweet.pic}}" alt="{{tweet.title}}" /></p>
+                <br><br><img src="{{tweet.pic}}" alt="{{tweet.title}}" />
                 {% endif %}]]></description>
             </item>
         {% endfor %}
