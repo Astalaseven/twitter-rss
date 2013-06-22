@@ -58,7 +58,7 @@ class Tweet(object):
 
             content = urllib2.urlopen(pic_url)
             soup = BeautifulSoup(content)
-            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+.jpg:large)', str(soup))[0]
+            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+.\S+:large)', str(soup))[0]
         return pic
 
     def clean_timestamp(self,timestamp):
