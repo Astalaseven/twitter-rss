@@ -5,7 +5,7 @@ Rss-generator for Twitter
 
 * Doesn't make use of Twitter API (no registration needed, no 180 requests limitation, ...)
 * Support account and hashtag following
-* Option to append pic.twitter.com images in feed [in dev]
+* Option to append pic.twitter.com images in feed
 * Generate a valid RSS-feed
 
 ## Installation
@@ -22,7 +22,8 @@ Requirements : `python2`
 ## Launch
 
 You can edit `config.py` file to change the time between two updates (TIMER = 600),the server name 
-(SERVER = 'localhost:5000') and where the files should be stocked (DIR = '/var/www/').
+(SERVER = 'localhost:5000'), where the files should be stocked (DIR = '/var/www/') and if you want 
+to fetch the tweet pic (PICS = False).
 
     cd twitter-rss/
     python2 run.py
