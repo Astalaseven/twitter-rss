@@ -129,7 +129,7 @@ class TweetGetter(object):
                 template = Template(template_file.read())
                 return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
         except IOError:
-            return 'File could not be open'
+            return 'Template could not be open'
 
 
 class UserTweetGetter(TweetGetter):
