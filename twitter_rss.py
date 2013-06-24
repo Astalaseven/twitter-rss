@@ -120,7 +120,7 @@ class TweetGetter(object):
 
     def to_rss(self, server=config.SERVER):
         try:
-            with open('rss-model.tpl') as template_file:
+            with open(config.INSTALL_DIR + 'rss-model.tpl') as template_file:
                 items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))
                 try:
                     descriptor = '#' + self.hashtag

@@ -7,19 +7,19 @@ import subprocess
 import config
 
 # Launch web server
-p = subprocess.Popen(['/usr/bin/python2', 'server.py'])
+p = subprocess.Popen(['/usr/bin/python2', config.INSTALL_DIR + 'server.py'])
 
 # Update the feeds
 try:
     while 1:
         print 'Updating ALL THE FEEDS!'
         try:
-            with open(config.DIR + 'user/user.txt', 'r') as usernames:
+            with open(config.XML_DIR + 'user/user.txt', 'r') as usernames:
                 for user in usernames:
                     twitter_rss.UserTweetGetter(user)
             usernames.close()
 
-            with open(config.DIR + 'htag/htag.txt', 'r') as hashtags:
+            with open(config.XML_DIR + 'htag/htag.txt', 'r') as hashtags:
                 for htag in hashtags:
                     twitter_rss.HashtagTweetGetter(user)
             hashtags.close()

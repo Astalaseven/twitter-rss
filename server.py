@@ -28,7 +28,7 @@ def handle_htag():
 @app.route('/<path>/<feed>.xml')
 def feed_to_xml(feed, path):
     try:
-        with open(config.DIR + path + '/' + feed + '.xml') as tweets:
+        with open(config.XML_DIR + path + '/' + feed + '.xml') as tweets:
             tweets = tweets.read()
             if not tweets:
                 err = 'Cache is empty'
@@ -54,7 +54,7 @@ def write_data_to_file(tweets, feed, path):
     try:
         data = tweets.to_rss().encode('utf-8')
         print 'File does not exist: Creating feed...'
-        with open(config.DIR + path + '/' + feed + '.xml', 'w') as cache:
+        with open(config.XML_DIR + path + '/' + feed + '.xml', 'w') as cache:
             cache.write(data)
         cache.close()
         error = tweets.to_rss()
@@ -67,7 +67,7 @@ def write_data_to_file(tweets, feed, path):
 
 def save_feed_for_updating(feed, path):
     try:
-        with open(config.DIR + path + '/' + path + '.txt', 'a') as save:
+        with open(config.XML_DIR + path + '/' + path + '.txt', 'a') as save:
             save.write(feed + '\n')
         save.close()
     except IOError:
