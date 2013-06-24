@@ -5,9 +5,10 @@ import twitter_rss
 import time
 import subprocess
 import config
+import sys
 
 # Launch web server
-p = subprocess.Popen(['/usr/bin/python2', config.INSTALL_DIR + 'server.py'])
+p = subprocess.Popen([sys.executable, config.INSTALL_DIR + 'server.py'])
 
 # Update the feeds
 try:
