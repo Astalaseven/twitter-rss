@@ -135,13 +135,13 @@ class TweetGetter(object):
 class UserTweetGetter(TweetGetter):
     def __init__(self, username, get_pics = False):
         self.username = username
-        self.url = "https://twitter.com/{}".format(self.username)
+        self.url = "https://twitter.com/{0}".format(self.username)
 
         self.parse_twitter()
 
 class HashtagTweetGetter(TweetGetter):
     def __init__(self, hashtag, get_pics = False):
         self.hashtag = hashtag
-        self.url = "https://twitter.com/search?q=%23{}".format(self.hashtag)
+        self.url = "https://twitter.com/search?q=%23{0}".format(self.hashtag)
 
         self.parse_twitter()
