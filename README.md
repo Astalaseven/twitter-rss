@@ -15,9 +15,7 @@ Requirements : `python2`
     git clone git://github.com/Astalaseven/twitter-rss.git
 
     sudo apt-get install python-pip
-    sudo pip install BeautifulSoup
-    sudo pip install arrow
-    sudo pip install flask
+    sudo pip install -r requirements.txt
     
 ## Launch
 
