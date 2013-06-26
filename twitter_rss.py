@@ -11,7 +11,7 @@ from jinja2 import Template
 class Tweet(object):
 
     def __init__(self, text, meta, get_pics=False):
-        self.raw_text = str(text).decode(encoding='UTF-8')
+        self.raw_text = str(text).decode('UTF-8')
         self.set_info(meta)
         self.get_pics = get_pics
 
