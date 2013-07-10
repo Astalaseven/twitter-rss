@@ -123,9 +123,11 @@ class TweetGetter(object):
             with open(config.INSTALL_DIR + 'rss-model.tpl') as template_file:
                 items = list(map(lambda tweet: tweet.to_jinja2(), self.tweets))
                 try:
-                    descriptor = '#' + self.hashtag
+                    descriptor = self.hashtag
+                    directory = 'htag'
                 except AttributeError:
                     descriptor = self.username
+                    directory = 'user'
                 template = Template(template_file.read())
                 return template.render(server=server, title=self.title, descriptor=descriptor, url=self.url, tweets=items)
         except IOError:
