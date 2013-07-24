@@ -27,26 +27,26 @@ def handle_htag():
 
 @app.route('/<path>/<feed>.xml')
 def feed_to_xml(feed, path):
+    # try:
+    #     with open(config.XML_DIR + path + '/' + feed + '.xml') as tweets:
+    #         tweets = tweets.read()
+    #         if not tweets:
+    #             err = 'Cache is empty'
+    #             error = render_template('index.tpl', err=err)
+    #         else:
+    #             error = tweets
+    # except IOError:
     try:
-        with open(config.XML_DIR + path + '/' + feed + '.xml') as tweets:
-            tweets = tweets.read()
-            if not tweets:
-                err = 'Cache is empty'
-                error = render_template('index.tpl', err=err)
-            else:
-                error = tweets
-    except IOError:
-        try:
-            if path == 'user':
-                tweets = twitter_rss.UserTweetGetter(feed)
-            elif path == 'htag':
-                tweets = twitter_rss.HashtagTweetGetter(feed)
-            error = tweets.to_rss().encode('utf-8')
-        except AttributeError:
-            err = 'User not found'
-            error = render_template('index.tpl', err=err)
-        write_data_to_file(tweets, feed, path)
-        save_feed_for_updating(feed, path)
+        if path == 'user':
+            tweets = twitter_rss.UserTweetGetter(feed)
+        elif path == 'htag':
+            tweets = twitter_rss.HashtagTweetGetter(feed)
+        error = tweets.to_rss().encode('utf-8')
+    except AttributeError:
+        err = 'User not found'
+        error = render_template('index.tpl', err=err)
+    write_data_to_file(tweets, feed, path)
+    save_feed_for_updating(feed, path)
     return error
            
 def write_data_to_file(tweets, feed, path):
