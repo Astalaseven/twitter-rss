@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from BeautifulSoup import BeautifulSoup
-import urllib2
+import requests
 import re
 import arrow
 import config
@@ -56,8 +56,8 @@ class Tweet(object):
         if 'pic.twitter.com' in self.raw_text:
             pic_url = 'http://' + str(re.sub(r'.*dir="ltr">pic.twitter.com/(.*?)</a>.*', r'pic.twitter.com/\1', self.raw_text.encode('utf8')))
 
-            content = urllib2.urlopen(pic_url)
-            soup = BeautifulSoup(content)
+            content = requests.get(pic_url)
+            soup = BeautifulSoup(content.text)
             pic = re.findall(r'(https?://pbs.twimg.com/media/\S+.\S+:large)', str(soup))[0]
         return pic
 
@@ -105,9 +105,11 @@ class TweetGetter(object):
 
     def parse_twitter(self):
         try:
-            content = urllib2.urlopen(self.url)
+            content = requests.get(self.url)
+            if content.status_code == 404:
+                raise requests.HTTPError
             print 'Connection successful!'
-            soup = BeautifulSoup(content)
+            soup = BeautifulSoup(content.text)
 
             self.title = soup.title.string
             self.tweets = []
@@ -115,7 +117,7 @@ class TweetGetter(object):
             for content in soup.findAll("div", "content"):
                 for meta, text in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
                     self.tweets.append(Tweet(text, meta))
-        except urllib2.HTTPError:
+        except requests.HTTPError:
             print 'Error 404: Account not found'
 
     def to_rss(self, server=config.SERVER):
