@@ -8,6 +8,15 @@ Rss-generator for Twitter
 * Option to append pic.twitter.com images in feed
 * Generate a valid RSS-feed
 
+A running instance is available here: https://wtf.roflcopter.fr/twitter-rss/ 
+on PoGo606's server (https://wtf.roflcopter.fr/links/pogo). 
+
+The theme can be found here:
+https://github.com/PoGo606/twitter-rss/commit/9835654ac549b01b76d4a87cf9e4c096578b30f2
+
+Default theme: ![ScreenShot](http://i.imgur.com/slSbJBO.png)
+Pogo's theme: ![ScreenShot](http://i.imgur.com/i9bv24r.png)
+
 ## Installation
 
 Requirements : `python2`
