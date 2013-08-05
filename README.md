@@ -12,9 +12,9 @@ Rss-generator for Twitter
 
 Requirements : `python2`
 
-    git clone git://github.com/Astalaseven/twitter-rss.git
-
-    sudo apt-get install python-pip
+    sudo apt-get install git python-pip
+    
+    git clone git://github.com/Astalaseven/twitter-rss.git    
     sudo pip install -r requirements.txt
     
 ## Launch
@@ -28,3 +28,13 @@ to fetch the tweet pic (PICS = False).
   
 `run.py` will launch a webserver that can be used to create new feeds. You can also create them by opening 
 `your_server/user/choosen-user-or-hashtag.xml` or by directly write them down in `user/user.txt` and `htag/htag.txt`.
+
+## Docker way
+
+Thanks to [djmaze] [1], it is now possible to run `twitter-rss` using [Docker] [2].
+
+Explanations on how to get it working are here: http://www.docker.io/gettingstarted/
+(Docker only works on 64bit systems for now)
+
+[1]: https://github.com/djmaze "djmaze"
+[2]: hhttp://docker.io "Docker.io"
