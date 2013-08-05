@@ -9,6 +9,7 @@ RUN cd twitter-rss && pip install -r requirements.txt
 
 RUN sed -i "s/INSTALL_DIR.*/INSTALL_DIR = '\/twitter-rss\/'/" /twitter-rss/config.py
 RUN mkdir -p /var/www/twitter-rss/user
+RUN mkdir -p /var/www/twitter-rss/htag
 
 EXPOSE 5000
 
