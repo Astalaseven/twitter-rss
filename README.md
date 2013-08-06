@@ -69,7 +69,7 @@ and place it in the right place to be launch on startup:
 
 Gunicorn will launch a webserver that can be used to create new feeds, and launch a script to update the feeds. 
 
-Supervisor is set to check all scripts are running or as they need to be relaunched.
+Supervisor is set to check all scripts are running or if needed relaunch them.
 
 ### Creating a feed
 
