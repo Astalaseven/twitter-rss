@@ -17,8 +17,7 @@ class Tweet(object):
 
     def set_info(self, meta):
         for href in meta.findAll('a'):
-            self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(
-                href.attrs[0]))
+            self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(href.attrs[0]))
 
             span = meta.find('span')
             timestamp = re.sub(r'\(u\'data-time\', u\'(.*)\'\)', r'\1', str(span.attrs[1]))
@@ -58,7 +57,7 @@ class Tweet(object):
 
             content = requests.get(pic_url)
             soup = BeautifulSoup(content.text)
-            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+.\S+:large)', str(soup))[0]
+            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+\.\S+:large)', str(soup))[0]
         return pic
 
     def clean_timestamp(self,timestamp):
