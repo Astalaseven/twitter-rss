@@ -3,12 +3,7 @@
 
 import twitter_rss
 import time
-import subprocess
 import config
-import sys
-
-# Launch web server
-p = subprocess.Popen([sys.executable, config.INSTALL_DIR + 'server.py'])
 
 # Update the feeds
 try:
@@ -29,5 +24,4 @@ try:
         time.sleep(config.TIMER)
 
 except (KeyboardInterrupt, SystemExit):
-    p.kill() # kill the subprocess
     print '\nKeyboardInterrupt catched -- Finishing program.'

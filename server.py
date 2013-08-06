@@ -9,7 +9,6 @@ import twitter_rss
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def index():
     return render_template('index.tpl')
@@ -76,7 +75,7 @@ def update_id_in_txt_file(txt_file, feed, new_first_id):
         m.write(update)
 
 def check_if_new_tweet(feed, path):
-    print('Checking if new tweet...')
+    print('Checking if new tweet for {0}...'.format(feed))
     update = True
     txt_file = config.XML_DIR + path + '/' + path + '.txt'
     new_first_id = find_new_first_id(feed, path)
@@ -135,6 +134,6 @@ def page_not_found(code):
 
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run(host='0.0.0.0')
+    app.run(debug=True)
+    # app.run(host='0.0.0.0')
     # app.run()

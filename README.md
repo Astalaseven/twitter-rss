@@ -46,10 +46,34 @@ You can edit `config.py` file to change the time between two updates (`TIMER = 6
 The server name must be set to have a valid RSS feed (`SERVER = 'localhost:5000'`).
 
     cd twitter-rss/
-    python2 run.py
-  
-`run.py` will launch a webserver that can be used to create new feeds. You can also create them by opening 
-`your_server/user/choosen-user-or-hashtag.xml` or by directly write them down in `user/user.txt` and `htag/htag.txt`.
+    python2 server.py
+
+### Using Gunicorn and Supervisor (recommended)
+
+#### Installing packages
+
+    sudo apt-get install gunicorn supervisor
+
+Modify `supervisord.conf` to reflect your installation:
+
+    directory=/home/asta/twitter-rss/    # directory where `server.py` is located
+
+You can check if `supervisor` works well:
+
+    sudo supervisord -n -c ~/twitter-rss/supervisord.conf
+
+
+Gunicorn will launch a webserver that can be used to create new feeds, and launch a script to update the feeds. 
+
+Supervisor is set to check all scripts are running or as they need to be relaunched.
+
+### Creating a feed
+
+If the webserver is running, you can create them by: 
+
+* using the web form served by Gunicorn (`http://your_server:8000/),
+* opening `http://your_server/user/choosen-user.xml` or `http://you_server/htag/choosen-hashtag`,
+* writing them down in `user/user.txt` and `htag/htag.txt`.
 
 ### Use a different port
 
