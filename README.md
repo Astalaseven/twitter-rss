@@ -43,7 +43,7 @@ Requirements : `python2`
 
 You can edit `config.py` file to change the time between two updates (`TIMER = 600`), where the files should be stocked (`DIR = '/var/www/'`) and if you want to fetch the tweet pic (`PICS = False`).
 
-The server name must be set to have a valid RSS feed (`SERVER = 'localhost:5000'`).
+The server name must be set to have a valid RSS feed (`SERVER = 'http://localhost:8000'`).
 
     cd twitter-rss/
     python2 server.py
