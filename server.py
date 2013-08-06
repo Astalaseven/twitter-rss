@@ -64,7 +64,7 @@ def find_old_first_id(txt_file, feed):
             content = f.read()
             old_first_id = re.findall("{0} -- (\d+)".format(feed), content)[0]
     except IndexError:
-        pass
+        old_first_id = "1337"
     return old_first_id
 
 def update_id_in_txt_file(txt_file, feed, new_first_id):
