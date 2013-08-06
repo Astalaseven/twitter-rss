@@ -62,6 +62,10 @@ You can check if `supervisor` works well:
 
     sudo supervisord -n -c ~/twitter-rss/supervisord.conf
 
+and place it in the right place to be launch on startup:
+
+    sudo mv ~/twitter-rss/supervisord.conf /etc/supervisor/
+
 
 Gunicorn will launch a webserver that can be used to create new feeds, and launch a script to update the feeds. 
 
@@ -69,7 +73,7 @@ Supervisor is set to check all scripts are running or as they need to be relaunc
 
 ### Creating a feed
 
-If the webserver is running, you can create them by: 
+If the webserver is running, you can create a feed by: 
 
 * using the web form served by Gunicorn (`http://your_server:8000/),
 * opening `http://your_server/user/choosen-user.xml` or `http://you_server/htag/choosen-hashtag`,
@@ -77,11 +81,9 @@ If the webserver is running, you can create them by:
 
 ### Use a different port
 
-If you want to launch `twitter-rss` on a different port than Flask's default (5000), you need to edit the `server.py` file to:
+If you want to launch `twitter-rss` on a different port than Gunicorn's default (8000), you need to edit the `supervisord.conf` file to:
 
-    if __name__ == "__main__":
-        app.run(host='0.0.0.0', 5000)     # where 5000 must be replaced 
-                                          # by your choosen port
+    command=/usr/bin/gunicorn --bind=0.0.0.0:5000 server:app  # where 5000 is the new port
 
 
 ## Daemon
