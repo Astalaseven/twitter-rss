@@ -69,7 +69,7 @@ and place it in the right place to be launch on startup:
 
 Gunicorn will launch a webserver that can be used to create new feeds, and launch a script to update the feeds. 
 
-Supervisor is set to check all scripts are running or if needed relaunch them.
+Supervisor is set to check all scripts are running or if needed relaunch them. Ubuntu should automatically launch it on startup.
 
 ### Creating a feed
 
@@ -90,7 +90,7 @@ If you want to launch `twitter-rss` on a different port than Gunicorn's default 
 
 ## Daemon
 
-A daemon script is not available to be run on Debian-like system (tested on Ubuntu 13.04) thanks to [PoGo606] [3].
+A daemon script is now available to be run on Debian-like system (tested on Ubuntu 13.04) thanks to [PoGo606] [3].
 
     sudo mkdir -p /var/log/twitter-rss
     sudo mkdir -p /var/www/twitter-rss
