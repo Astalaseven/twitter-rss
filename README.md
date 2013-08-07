@@ -76,7 +76,7 @@ Supervisor is set to check all scripts are running or if needed relaunch them.
 If the webserver is running, you can create a feed by: 
 
 * using the web form served by Gunicorn (`http://your_server:5000/`),
-* opening `http://your_server/user/choosen-user.xml` or `http://you_server/htag/choosen-hashtag`,
+* opening `http://your_server:5000/user/choosen-user.xml` or `http://your_server:5000/htag/choosen-hashtag`,
 * writing them down in `user/user.txt` and `htag/htag.txt`.
 
 ### Use a different port
