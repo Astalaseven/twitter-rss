@@ -71,8 +71,7 @@ def update_id_in_txt_file(txt_file, feed, new_first_id):
     with open(txt_file, 'r') as f:
             content = f.read()
     with open(txt_file, 'w') as m:
-        update = re.sub("{0} -- \d+".format(feed), "{0} -- {1}".format(feed, new_first_id), content)
-        m.write(update)
+        update = re.sub("{0}.*".format(feed), "{0} -- {1}".format(feed, new_first_id), content)
 
 def check_if_new_tweet(feed, path):
     print('Checking if new tweet for {0}...'.format(feed))
