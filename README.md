@@ -85,6 +85,8 @@ If you want to launch `twitter-rss` on a different port than Gunicorn's default 
 
     command=/usr/bin/gunicorn --bind=0.0.0.0:5000 server:app  # where 5000 is the new port
 
+`supervisord.conf` is already configured to use Gunicorn on port 5000.
+
 
 ## Daemon
 
