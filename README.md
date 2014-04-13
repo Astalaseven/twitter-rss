@@ -90,7 +90,7 @@ If you want to launch `twitter-rss` on a different port than Gunicorn's default 
 
 ## Daemon
 
-A daemon script is now available to be run on Debian-like system (tested on Ubuntu 13.04) thanks to [PoGo606] [3].
+A daemon script is now available to be run on Debian-like system (tested on Ubuntu 13.04) thanks to [PoGo606] [1].
 
     sudo mkdir -p /var/log/twitter-rss
     sudo mkdir -p /var/www/twitter-rss
@@ -107,11 +107,21 @@ If the server doesn't run, try to remove the `--background` option in `twitter-r
 
 ## Docker way
 
-Thanks to [djmaze] [1], it is now possible to run `twitter-rss` using [Docker] [2].
+Thanks to [djmaze] [2], it is now possible to run `twitter-rss` using [Docker] [3].
 
-Explanations on how to get it working are here: http://www.docker.io/gettingstarted/
+Explanations on how to get docker working are here: http://www.docker.io/gettingstarted/
 (Docker only works on 64bit systems for now)
 
-[1]: https://github.com/djmaze "djmaze"
-[2]: http://docker.io "Docker.io"
-[3]: https://github.com/PoGo606/twitter-rss/b44b0f6b0c8630fa83b46148702f05b55664935b/tools/twitter-rss.init.d.debian
+After installing docker, you can build the docker image and run it:
+
+    sudo docker build -t twitter-rss .
+    sudo docker run -d -p 5000:5000 twitter-rss
+
+Or use [fig] [4]:
+
+    sudo fig up -d
+
+[1]: https://github.com/PoGo606/twitter-rss/b44b0f6b0c8630fa83b46148702f05b55664935b/tools/twitter-rss.init.d.debian
+[2]: https://github.com/djmaze "djmaze"
+[3]: http://docker.io "Docker.io"
+[4]: http://orchardup.github.io/fig/
