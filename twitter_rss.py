@@ -1,26 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import requests
 import re
 import arrow
 import config
 from jinja2 import Template
+from xml.sax.saxutils import escape
+
 
 class Tweet(object):
 
     def __init__(self, text, meta, get_pics=False):
         self.raw_text = str(text).decode('UTF-8')
+        self.text = escape(text.text)
         self.set_info(meta)
         self.get_pics = get_pics
 
     def set_info(self, meta):
-        for href in meta.findAll('a'):
-            self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(href.attrs[0]))
+        for href in meta.find_all('a'):
+            self.link = re.sub(r'\(u\'href\', u\'(.*)\'\)', r'\1', str(href.attrs['href']))
 
-            span = meta.find('span')
-            timestamp = re.sub(r'\(u\'data-time\', u\'(.*)\'\)', r'\1', str(span.attrs[1]))
+            span = meta.find('span', 'js-short-timestamp')
+            timestamp = re.sub(r'\(u\'data-time\', u\'(.*)\'\)', r'\1', str(span.attrs['data-time']))
 
             self.date = self.clean_timestamp(timestamp)
             self.author = self.link.split('/')[1]
@@ -43,12 +46,7 @@ class Tweet(object):
             for old, new in item.items():
                 output = re.sub(old, new, output)
 
-        title = output
-        to_delete = self.TWEET_DELETE
-        for item in to_delete:
-            title = re.sub(item, '', title)
-
-        return [output, title]
+        return output
 
     def get_pic(self):
         pic = None
@@ -57,7 +55,7 @@ class Tweet(object):
 
             content = requests.get(pic_url)
             soup = BeautifulSoup(content.text)
-            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+\.\S+:large)', str(soup))[0]
+            pic = re.find_all(r'(https?://pbs.twimg.com/media/\S+\.\S+:large)', str(soup))[0]
         return pic
 
     def clean_timestamp(self,timestamp):
@@ -65,11 +63,11 @@ class Tweet(object):
 
     def to_jinja2(self):
         template = {
-                'title' : self.clean_text()[1],
+                'title' : self.text,
                 'author'  : self.author,
                 'link' : self.link,
                 'date' : self.date.strftime('%a, %d %b %Y %H:%M:%S %z'),
-                'content' : self.clean_text()[0]
+                'content' : self.clean_text()
             }
         if config.PICS is True and self.get_pic() != None:
             template.update({'pic' : self.get_pic()})
@@ -84,6 +82,7 @@ class Tweet(object):
         ' class="twitter-timeline-link"',
         ' class="tco-ellipsis"',
         ' class="invisible"',
+        ' class="ProfileTweet-text js-tweet-text u-dir"',
         ' data-query-source="hashtag_click"',
         ' rel="nofollow"',
         ' target="_blank"',
@@ -113,8 +112,8 @@ class TweetGetter(object):
             self.title = soup.title.string
             self.tweets = []
 
-            for content in soup.findAll("div", "content"):
-                for meta, text in zip(content.findAll("small", "time"), content.findAll("p", "js-tweet-text tweet-text")):
+            for content in soup.find_all("div", {'class': ["content", "StreamItem"]}):
+                for meta, text in zip(content.find_all(["small", "div"], {"class": ["time", "ProfileTweet-authorDetails"]}), content.find_all("p", "js-tweet-text")):
                     self.tweets.append(Tweet(text, meta))
         except requests.HTTPError:
             print 'Error 404: Account not found'
@@ -138,7 +137,7 @@ class TweetGetter(object):
 class UserTweetGetter(TweetGetter):
     def __init__(self, username, get_pics = False):
         self.username = username
-        self.url = "https://twitter.com/{0}".format(self.username)
+        self.url = "https://twitter.com/{0}/with_replies".format(self.username)
 
         self.parse_twitter()
 
