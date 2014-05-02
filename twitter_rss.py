@@ -10,11 +10,14 @@ from jinja2 import Template
 from xml.sax.saxutils import escape
 
 
+picRegex = re.compile('pic\.twitter\.')
+
+
 class Tweet(object):
 
     def __init__(self, text, meta, get_pics=False):
         self.raw_text = str(text).decode('UTF-8')
-        self.text = escape(text.text)
+        self.text = text
         self.set_info(meta)
         self.get_pics = get_pics
 
@@ -51,11 +54,11 @@ class Tweet(object):
     def get_pic(self):
         pic = None
         if 'pic.twitter.com' in self.raw_text:
-            pic_url = 'http://' + str(re.sub(r'.*dir="ltr">pic.twitter.com/(.*?)</a>.*', r'pic.twitter.com/\1', self.raw_text.encode('utf8')))
+            pic_url = 'http://' + self.text.find('a', text=picRegex).text
 
             content = requests.get(pic_url)
             soup = BeautifulSoup(content.text)
-            pic = re.find_all(r'(https?://pbs.twimg.com/media/\S+\.\S+:large)', str(soup))[0]
+            pic = re.findall(r'(https?://pbs.twimg.com/media/\S+\.\S+:large)', str(soup))[0]
         return pic
 
     def clean_timestamp(self,timestamp):
@@ -63,7 +66,7 @@ class Tweet(object):
 
     def to_jinja2(self):
         template = {
-                'title' : self.text,
+                'title' : escape(self.text.text),
                 'author'  : self.author,
                 'link' : self.link,
                 'date' : self.date.strftime('%a, %d %b %Y %H:%M:%S %z'),
