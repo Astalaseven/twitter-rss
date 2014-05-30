@@ -1,31 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import twitter_rss
+import logging
 import time
+
 import config
-import re
+import twitter_rss
 
-# Update the feeds
-try:
-    while 1:
-        print 'Updating ALL THE FEEDS!'
-        try:
-            with open(config.XML_DIR + 'user/user.txt', 'r') as usernames:
-                for user in usernames:
-                    user = re.findall('(\w+)', user)[0]
-                    print(user)
-                    twitter_rss.UserTweetGetter(user)
-            usernames.close()
+_logger = logging.getLogger(__name__)
 
-            with open(config.XML_DIR + 'htag/htag.txt', 'r') as hashtags:
-                for htag in hashtags:
-                    htag = re.findall('(\w+)', htag)[0]
-                    twitter_rss.HashtagTweetGetter(htag)
-            hashtags.close()
-        except IOError:
-            print 'File could not be read'
-        time.sleep(config.TIMER)
 
-except (KeyboardInterrupt, SystemExit):
-    print '\nKeyboardInterrupt catched -- Finishing program.'
+def main():
+    feed_manager = twitter_rss.FeedManager()
+    try:
+        while 1:
+            _logger.info('Updating ALL THE FEEDS!')
+            feed_manager.update_all_feeds()
+            _logger.info('Wait for {} seconds'.format(config.TIMER))
+            time.sleep(config.TIMER)
+    except (KeyboardInterrupt, SystemExit):
+        _logger.info('\nKeyboardInterrupt catched -- Finishing program.')
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    main()

@@ -26,19 +26,7 @@ Requirements : `python2`
     git clone git://github.com/Astalaseven/twitter-rss.git    
     sudo pip install -r requirements.txt
 
-### Creating folders to store the feeds
 
-    sudo mkdir -p /var/www/twitter-rss/     # default XML_DIR in config.py
-    cd /var/www/twitter-rss/
-    sudo mkdir user/ && sudo touch user/user.txt
-    sudo mkdir htag/ && sudo touch htag/htag.txt
-
-### Setting right permissions
-
-    sudo chown your_username:www-data -R /var/www/twitter-rss
-    sudo chmod 0755 -R /var/www/twitter-rss
-
-    
 ## Launch
 
 You can edit `config.py` file to change the time between two updates (`TIMER = 600`), where the files should be stocked (`DIR = '/var/www/'`) and if you want to fetch the tweet pic (`PICS = False`).
