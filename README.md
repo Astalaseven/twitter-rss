@@ -20,40 +20,41 @@ Pogo's theme: ![ScreenShot](http://i.imgur.com/i9bv24r.png)
 ## Installation
 
 Requirements : `python2`
-
-    sudo apt-get install git python-pip
+```
+sudo apt-get install git python-pip
     
-    git clone git://github.com/Astalaseven/twitter-rss.git    
-    sudo pip install -r requirements.txt
-
+git clone git://github.com/Astalaseven/twitter-rss.git
+sudo pip install -r requirements.txt
+```
 
 ## Launch
 
-You can edit `config.py` file to change the time between two updates (`TIMER = 600`), where the files should be stocked (`DIR = '/var/www/'`) and if you want to fetch the tweet pic (`PICS = False`).
-
-The server name must be set to have a valid RSS feed (`SERVER = 'http://localhost:5000'`).
-
-    cd twitter-rss/
-    python2 server.py
+You can edit `local_settings.ini` file to change settings (use settings.ini as template, `local_settings.ini` will not be overwritten on update).
+```
+cd twitter-rss/
+python2 server.py
+```
 
 ### Using Gunicorn and Supervisor (recommended)
 
 #### Installing packages
-
-    sudo apt-get install gunicorn supervisor
+```
+sudo apt-get install gunicorn supervisor
+```
 
 Modify `supervisord.conf` to reflect your installation:
-
-    directory=/home/asta/twitter-rss/    # directory where `server.py` is located
+```
+directory=/home/asta/twitter-rss/    # directory where `server.py` is located
+```
 
 You can check if `supervisor` works well:
-
-    sudo supervisord -n -c ~/twitter-rss/supervisord.conf
-
+```
+sudo supervisord -n -c ~/twitter-rss/supervisord.conf
+```
 and place it in the right place to be launch on startup:
-
-    sudo mv ~/twitter-rss/supervisord.conf /etc/supervisor/
-
+```
+sudo mv ~/twitter-rss/supervisord.conf /etc/supervisor/
+```
 
 Gunicorn will launch a webserver that can be used to create new feeds, and launch a script to update the feeds. 
 
@@ -70,8 +71,9 @@ If the webserver is running, you can create a feed by:
 ### Use a different port
 
 If you want to launch `twitter-rss` on a different port than Gunicorn's default (8000), you need to edit the `supervisord.conf` file to:
-
-    command=/usr/bin/gunicorn --bind=0.0.0.0:5000 server:app  # where 5000 is the new port
+```
+command=/usr/bin/gunicorn --bind=0.0.0.0:5000 server:app  # where 5000 is the new port
+```
 
 `supervisord.conf` is already configured to use Gunicorn on port 5000.
 
@@ -79,15 +81,16 @@ If you want to launch `twitter-rss` on a different port than Gunicorn's default 
 ## Daemon
 
 A daemon script is now available to be run on Debian-like system (tested on Ubuntu 13.04) thanks to [PoGo606] [1].
-
-    sudo mkdir -p /var/log/twitter-rss
-    sudo mkdir -p /var/www/twitter-rss
-    cd /var/www/twitter-rss
-    sudo chmod +x twitter-rss.init.d.debian
-    sudo chmod +x run.py
-    sudo touch /var/log/twitter-rss/twitter-rss.log
-    sudo chmod 640 /var/log/twitter-rss/twitter-rss.log
-    sudo ./twitter-rss.init.d.debian start
+```
+sudo mkdir -p /var/log/twitter-rss
+sudo mkdir -p /var/www/twitter-rss
+cd /var/www/twitter-rss
+sudo chmod +x twitter-rss.init.d.debian
+sudo chmod +x run.py
+sudo touch /var/log/twitter-rss/twitter-rss.log
+sudo chmod 640 /var/log/twitter-rss/twitter-rss.log
+sudo ./twitter-rss.init.d.debian start
+```
 
 You also need to change the `INSTALL_DIR` variable in `config.py` to be the same as `TWRSS_DIR` variable in `twitter-rss.init.d.debian`.
 
@@ -101,13 +104,25 @@ Explanations on how to get docker working are here: http://www.docker.io/getting
 (Docker only works on 64bit systems for now)
 
 After installing docker, you can build the docker image and run it:
-
-    sudo docker build -t twitter-rss .
-    sudo docker run -d -p 5000:5000 twitter-rss
+```
+sudo docker build -t twitter-rss .
+sudo docker run -d -p 5000:5000 twitter-rss
+```
 
 Or use [fig] [4]:
+```
+sudo fig up -d
+```
 
-    sudo fig up -d
+## The Heroku way
+1. Install Heroku-toolbelt
+1. Configure your account `heroku login`
+
+```
+heroku create <app-name>
+git push heroku master  # upload your application to Heroku
+heroku open  # Open your application in your browser
+```
 
 [1]: https://github.com/PoGo606/twitter-rss/b44b0f6b0c8630fa83b46148702f05b55664935b/tools/twitter-rss.init.d.debian
 [2]: https://github.com/djmaze "djmaze"
