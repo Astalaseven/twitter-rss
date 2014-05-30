@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import logging
+import urlparse
 
 from flask import Flask, render_template, request, redirect, url_for
 
 import twitter_rss
 
 app = Flask(__name__)
+config = twitter_rss.Config()
 
 
 @app.route('/')
@@ -30,7 +32,7 @@ def handle_kind(kind):
 @app.route('/<kind>/<feed>.xml')
 def feed_to_xml(kind, feed):
     try:
-        return twitter_rss.FeedManager().get(kind, feed)
+        return twitter_rss.FeedManager(config).get(kind, feed)
     except OSError as e:
         return render_template('index.tpl', err="Can not create {0.filename}: {0.strerror}".format(e))
     except NotImplementedError as e:
@@ -38,7 +40,10 @@ def feed_to_xml(kind, feed):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    app.run(debug=True)
-    # app.run(host='0.0.0.0')
-    # app.run()
+    config.logging_init()
+    parsed_url = urlparse.urlparse(config.get('server.url'))
+    app.run(
+        host=parsed_url.hostname,
+        port=parsed_url.port,
+        debug=config.getbool('server.debug', False),
+    )

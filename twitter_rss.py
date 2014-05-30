@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import ConfigParser as configparser
 import logging
 import os.path
 import re
@@ -10,7 +11,6 @@ from jinja2 import Template
 import requests
 from xml.sax.saxutils import escape
 
-import config  # TODO
 
 _logger = logging.getLogger(__name__)
 
@@ -110,9 +110,10 @@ class Tweet(object):
 class TweetGetter(object):
     directory = None  # to be defined
 
-    def __init__(self, url, obj):
+    def __init__(self, url, obj, pictures=False):
         self.url = url
         self.obj = obj
+        self.pictures = pictures
 
         self.title = None
         self.tweets = None
@@ -138,7 +139,7 @@ class TweetGetter(object):
 
         for content in soup.find_all("div", {'class': ["content", "StreamItem"]}):
             for meta, text in get_meta_text(content):
-                self.tweets.append(Tweet(text, meta))
+                self.tweets.append(Tweet(text, meta, pictures=self.pictures))
 
     def to_rss(self, server="."):
         template_path = os.path.join(os.path.dirname(__file__), 'templates', 'rss-model.tpl')
@@ -152,15 +153,15 @@ class TweetGetter(object):
 
 
 class UserTweetGetter(TweetGetter):
-    def __init__(self, username):
+    def __init__(self, username, pictures=False):
         self.directory = 'user'
-        super(UserTweetGetter, self).__init__("https://twitter.com/{0}/with_replies", username)
+        super(UserTweetGetter, self).__init__("https://twitter.com/{0}/with_replies", username, pictures=pictures)
 
 
 class HashtagTweetGetter(TweetGetter):
-    def __init__(self, hashtag):
+    def __init__(self, hashtag, pictures=False):
         self.directory = 'htag'
-        super(HashtagTweetGetter, self).__init__("https://twitter.com/search?q=%23{0}", hashtag)
+        super(HashtagTweetGetter, self).__init__("https://twitter.com/search?q=%23{0}", hashtag, pictures=pictures)
 
 
 class FeedManager(object):
@@ -168,6 +169,11 @@ class FeedManager(object):
         'user': UserTweetGetter,
         'htag': HashtagTweetGetter,
     }
+
+    def __init__(self, config):
+        self.xml_dir = config.get('feeds.xml_dir', os.path.join(os.path.dirname(__file__), "data"))
+        self.cache_duration = config.getint('feeds.cache_duration', 15)
+        self.pictures = config.getbool('feeds.pictures', False)
 
     @staticmethod
     def create_file_if_needed(file_path):
@@ -182,10 +188,10 @@ class FeedManager(object):
         return file_path
 
     def update_file_path(self, kind):
-        return self.create_file_if_needed(os.path.join(config.XML_DIR, kind, '{}.txt'.format(kind)))
+        return self.create_file_if_needed(os.path.join(self.xml_dir, kind, '{}.txt'.format(kind)))
 
     def cached_file_path(self, kind, feed):
-        return self.create_file_if_needed(os.path.join(config.XML_DIR, kind, '{}.xml'.format(feed)))
+        return self.create_file_if_needed(os.path.join(self.xml_dir, kind, '{}.xml'.format(feed)))
 
     def add_feed_to_update_set(self, kind, feed):
         with open(self.update_file_path(kind), "w+") as file_io:
@@ -205,7 +211,7 @@ class FeedManager(object):
         if cached:
             return cached
 
-        tweets = self.HANDLERS[kind](feed)
+        tweets = self.HANDLERS[kind](feed, self.pictures)
         self.add_feed_to_update_set(kind, feed)
         return self.add_to_cache(kind, feed, tweets)
 
@@ -218,7 +224,7 @@ class FeedManager(object):
 
     def get_cached(self, kind, feed):
         cache_path = self.cached_file_path(kind, feed)
-        is_valid = lambda path: arrow.utcnow() < arrow.get(os.path.getmtime(path)).replace(minutes=+config.CACHE)
+        is_valid = lambda path: arrow.utcnow() < arrow.get(os.path.getmtime(path)).replace(minutes=+self.cache_duration)
         if not os.path.isfile(cache_path) or not is_valid(cache_path):
             _logger.info("Need to update cache for feed {}/{}".format(kind, feed))
             return None
@@ -232,3 +238,33 @@ class FeedManager(object):
             for obj in self.feed_update_set(kind):
                 _logger.info("Update {}/{} feed".format(kind, obj))
                 self.get(kind, obj)
+
+
+class Config(object):
+    SETTINGS_FILES = ('settings.ini', 'local_settings.ini')
+
+    def __init__(self, root_dir=os.path.dirname(__file__)):
+        self.parser = configparser.ConfigParser()
+        self.parser.read([os.path.join(root_dir, filename) for filename in self.SETTINGS_FILES])
+
+    def get(self, key, default=None):
+        section, option = key.split('.', 1)
+        environ_key = key.upper().replace('.', '_')
+        if environ_key in os.environ:
+            return os.environ[environ_key]
+
+        if self.parser.has_option(section, option):
+            return self.parser.get(section, option)
+
+        return default
+
+    def getint(self, key, default=None):
+        value = self.get(key)
+        return int(value) if value is not None else default
+
+    def getbool(self, key, default=None):
+        value = self.get(key)
+        return value.lower() in ('true', 'yes', '1') if value is not None else default
+
+    def logging_init(self):
+        logging.basicConfig(level=getattr(logging, self.get('logging.level', 'WARNING')))
