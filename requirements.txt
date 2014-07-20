@@ -2,3 +2,6 @@ beautifulsoup4
 arrow
 flask
 requests
+
+# for heroku
+gunicorn
